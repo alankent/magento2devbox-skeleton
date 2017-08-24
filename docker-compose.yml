@@ -1,0 +1,92 @@
+##
+# Services needed to run Magento2 application on Docker
+#
+# Docker Compose defines required services and attach them together through aliases
+##
+version: '2'
+services:
+    web:
+        container_name: m2web
+        restart: always
+        image: magento2devbox-web:latest
+        volumes:
+
+          # Uncomment to share your ~/.ssh directory with the container.
+          # This can be useful for GitHub ssh keys and similar.
+          #- "~/.ssh:/home/magento2/.ssh"
+
+          # Uncomment this line if you want to share your composer
+          # download cache between projects (more efficient, but
+          # means the auth.json file will also be shared).
+          #- "~/.composer:/home/magento2/.composer"
+
+          # Uncomment to use Docker volume mounts to share files with
+          # local file system. Not recommendd on Windows (use Unison instead).
+          #- "./shared/www:/var/www"
+
+          # Uncomment to mount local directory for apache log files.
+          #- "./shared/logs/apache2:/var/log/apache2"
+
+          # Uncomment to mount local directory for FPM log files.
+          #- "./shared/logs/php-fpm:/var/log/php-fpm"
+
+          # Uncomment to share Magento cloud CLI settings between projects.
+          #- "./shared/.magento-cloud:/home/magento2/.magento-cloud"
+
+        environment:
+          - SHARED_CODE_PATH="/home/magento2/magento2"
+          - USE_RABBITMQ=0
+          - USE_REDIS_FULL_PAGE_CACHE=0
+          - USE_REDIS_CACHE=0
+          - USE_REDIS_SESSIONS=0
+          - USE_VARNISH=0
+          - USE_ELASTICSEARCH=0
+          - MAGENTO_PUBLIC_KEY=57db5595af2135685cc2c96af1be707b
+          - MAGENTO_PRIVATE_KEY=9d74dca55383dcaf6b03d91cea09ecad
+          - MAGENTO_USE_SOURCES_IN_HOST=0
+          - CREATE_SYMLINK_EE=0
+          - HOST_CE_PATH=./shared/webroot
+          - EE_DIRNAME=magento2ee
+          - MAGENTO_DOWNLOAD_SOURCES_COMPOSER=1
+          - MAGENTO_EDITION=ce
+          - MAGENTO_VERSION=2.2.0-rc21
+          - MAGENTO_SAMPLE_DATA_INSTALL=1
+          - MAGENTO_DOWNLOAD_SOURCES_CLOUD=0
+          - MCLOUD_USERNAME=
+          - MCLOUD_PASSWORD=
+          - MCLOUD_GENERATE_NEW_TOKEN=
+          - MCLOUD_PROJECT=
+          - MCLOUD_BRANCH=
+          - MAGENTO_CRON_RUN=0
+          - MAGENTO_DI_COMPILE=0
+          - MAGENTO_GRUNT_COMPILE=0
+          - MAGENTO_STATIC_CONTENTS_DEPLOY=0
+          - MAGENTO_BACKEND_PATH=admin
+          - MAGENTO_ADMIN_USER=admin
+          - MAGENTO_ADMIN_PASSWORD=admin123
+        ports:
+          # Pick a random unused web server port. (Use 8080:80)
+          - 80
+          # Pick a random SSH port. (Use 22:22 to force it to be 22 locally)
+          - 22
+          # Pick a random unused unison port.
+          # (Only needed if using Unison for file syncing.)
+          - 5000
+
+    db:
+        container_name: m2db
+        restart: always
+        image: mysql:5.6
+        ports:
+          - "3306"
+        environment:
+          - MYSQL_ROOT_PASSWORD=root
+          - MYSQL_DATABASE=magento2
+        volumes:
+          # Uncomment if you want the database to live after removing the
+          # containers. (Can be confusing.)
+          #- "./shared/db:/var/lib/mysql"
+
+          # Uncomment to mount log files locally.
+          #- "./shared/logs/mysql:/var/log/mysql"
+
