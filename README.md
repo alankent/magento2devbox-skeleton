@@ -155,18 +155,6 @@ If you have an existing project with all the source code already under
 mounting, the code will automatically be visible; if you use Unison, it will
 copy files on your laptop into the web container when Unison is started.
 
-Note: This case includes if you decide to change the settings in
-`docker-composer.yml` after the containers have been created. You will need to
-remove the current containers and recreate them (including the database
-contents). MAKE SURE THE SOURCE CODE IS UP TO DATE UNDER THE `shared/www`
-DIRECTORY BEFORE DELETING THE CONTAINERS TO MAKE SURE YOU DO NOT ACCIDENTALLY
-LOSE ANY OF YOUR WORK.
-
-    docker-compose kill
-    docker-compose rm
-    # Make changes to docker-compose.yml
-    docker-compose up -d
-
 **Creating a New Project with Composer**
 
 Log into the web container.
@@ -176,9 +164,7 @@ Log into the web container.
 Create a new project under `/var/www/magento2`. (Update the project version
 number as appropriate.)
 
-    cd /var/www
-    mkdir magento2
-    cd magento2
+    cd /var/www/magento2
     composer create-project --repository=https://repo.magento.com/ magento/project-community-edition:2.1.8 .
     chmod +x bin/magento
 
@@ -392,6 +378,17 @@ remove the locally synchronized files under the `shared` directory.
 
     docker-compose kill
     docker-compose rm
+
+If you decide to change the settings in `docker-composer.yml` after the
+containers have been created, you will need to remove the current containers
+and recreate them (including the database contents). MAKE SURE THE SOURCE CODE
+IS UP TO DATE UNDER THE `shared/www` DIRECTORY BEFORE DELETING THE CONTAINERS
+TO MAKE SURE YOU DO NOT ACCIDENTALLY LOSE ANY OF YOUR WORK.
+
+    docker-compose kill
+    docker-compose rm
+    # Make changes to docker-compose.yml
+    docker-compose up -d
 
 ## Kitematic
 
