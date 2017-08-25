@@ -165,6 +165,7 @@ Create a new project under `/var/www/magento2`. (Update the project version
 number as appropriate.)
 
     cd /var/www/magento2
+    xdebug-off
     composer create-project --repository=https://repo.magento.com/ magento/project-community-edition:2.1.8 .
     chmod +x bin/magento
 
@@ -182,6 +183,7 @@ Check out the project from inside the container into the `magento2` directory.
     cd /var/www
     git clone https://github.com/mycompany/myproject.git magento2
     cd magento2
+    xdebug-off
     composer install
 
 **Magento Commerce (Cloud)**
@@ -204,7 +206,8 @@ your own fork repository URL if appropriate.
 
     cd /var/www
     git clone https://github.com/magento/magento2.git
-    cd /var/www/magento2
+    cd magento2
+    xdebug-off
     composer install
 
 Clone any other projects such as Magento Commerce (formerly Enterprise Edition)
@@ -212,7 +215,8 @@ or the B2B code base, if you have appropriate permissions.
 
     cd /var/www
     git clone https://github.com/magento/magento2ee.git
-    cd /var/www/magento2
+    cd magento2
+    xdebug-off
     composer require ...TODO...
 
 ### 6. Create the Database
@@ -224,14 +228,19 @@ Log on to the bash prompt inside the web container
 
     docker-compose exec web bash
 
-Tun the following commands to create a MyQL database to use.
+Run the following commands to create a MyQL database for the web site to use
+(plus a second database for integration tests to use).
 
     mysql -e 'CREATE DATABASE IF NOT EXISTS magento2;'
+    mysql -e 'CREATE DATABASE IF NOT EXISTS magento_integration_tests;'
 
 After the database is created, uncomment the line setting the default
 database in the MySQL `~/.my.cnf` file.
 
     sed -e 's/#database/database/' -i ~/.my.cnf
+
+The `mysql` command can now be used without arguments or selecting database.
+
     mysql
     > SHOW TABLES;
     > exit;
@@ -240,10 +249,6 @@ Set up all the Magento 2 tables with the following command (adjusting command
 line paramter values as desired).
 
     magento setup:install --db-host=db --db-name=magento2 --db-user=root --db-password=root --admin-firstname=Magento --admin-lastname=Administrator --admin-email=user@example.com --admin-user=admin --admin-password=admin123 --language=en_US --currency=USD --timezone=America/Chicago --use-rewrites=1 --backend-frontname=admin
-
-Put the site into developer mode.
-
-    magento deploy:mode:set developer
 
 It is recommended to NOT include the `--base_url` option during development as
 Docker can allocate a port number at random (including when container is
@@ -273,6 +278,14 @@ prompted.
 To load the sample data into the database, run
 
     magento setup:upgrade
+
+### 7. Put Site into Developer Mode
+
+Put the site into developer mode. Turning on xdebug is useful for debuging
+purposes, but makes all PHP scripts slower to execute.
+
+    magento deploy:mode:set developer
+    xdebug-on
 
 ### 7. Start Unison, if Needed
 
@@ -406,6 +419,10 @@ container list it is aware of.
 To flush various caches:
 
     magento cache:flush
+
+Tell any configured external caches (e.g. Redis) to clean themselves.
+
+    magento cache:clean
 
 To run cron by hand if not running automatically (run this twice to gurantee
 all jobs are queued and run).
