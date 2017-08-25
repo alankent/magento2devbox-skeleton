@@ -74,8 +74,9 @@ ready to get up and going with DevBox.
 
 ### 1. Create a Local Project Directory
 
-Create a new directory per project. Download a copy of the files in this
-GitHub repository to the project directory.
+Create a new directory per project. Use a meaningful directory names as it is
+also used as a prefix for DevBox containers. Download a copy of the files in
+this GitHub repository to the project directory.
 
   * Go to http://github.com/alankent/magento2devbox-skeleton
   * In the "Branch" drop down, select the tag closest to the project's version
@@ -108,15 +109,18 @@ adjustments as described by comments in the file. This includes:
   containers (e.g. on different projects). If you do not mount a directory, the
   cache will discarded when the container is removed.
 
+* Add your keys as web service environment variables if you want to share these
+  keys easily with other developers on the same project.
+
+* If you plan to use Varnish caching, uncomment the appropriate lines to create
+  the Varnish container. A common source of production web caching issues is
+  due to not testing with Varnish during development.
+
+* Similarly, if you plan to use Redis, ElasticSearch, or RabbitMQ in
+  production, uncomment the appropriate lines so you can test during
+  developement.
+
 ### 3. Launch the Containers
-
-TODO: SOME FOLLOWING STEPS REQUIRE docker-compose.yml FILE CHANGES AND CHANGES
-INSIDE THE CONTAINERS AFTER BEING BUILT. THAT WOULD REQUIRE SPLITTING
-DESCRIPTIONS OF VARNISH ETC INTO TWO SECTIONS - STEPS TO DO BEFORE STARTING THE
-CONTAINERS AND STEPS TO DO AFTERWARDS.
-
-TODO: SHOULD WE ADD A STEP DESCRIBING HOW TO SET UP A GIT REPO TO SHARE THE
-docker-compose.yml SETTINGS BETWEEN USERS?
 
 It is recommended to read through all the following steps before launching the
 containers as described below. Some of the optional steps below require
@@ -271,7 +275,7 @@ frontend development. Some versions of Magento however have a bug requiring
 have a broken version of Magento.
 
 If you are using RabbitMQ (AMPQ), the following command line arguments should
-be added when the project is created.
+be added when the project was created above.
 
     --amqp-virtualhost=/ --ampq-host=ampq --amqp-port=TODO --amqp-user=guest --amqp-password=guest
 

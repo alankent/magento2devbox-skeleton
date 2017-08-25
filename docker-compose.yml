@@ -90,6 +90,17 @@ services:
           # container. (Not recommended.)
           #- "./shared/db:/var/lib/mysql"
 
+    # Uncomment the following to enable Varnish support.
+    # (Make sure the service name indentation remains exactly aligned with
+    # the previous service names)
+    #varnish:
+    #    restart: always
+    #    depends_on:
+    #      - "web"
+    #    image: magento/magento2devbox-varnish:latest
+    #    ports:
+    #      - 6081
+
     # Uncomment the following lines to enable Redis support.
     # (Make sure the service name indentation remains exactly aligned with
     # the previous service names)
@@ -100,9 +111,15 @@ services:
     # Uncomment the following to enable ElasticSearch support.
     # (Make sure the service name indentation remains exactly aligned with
     # the previous service names)
-    #elasticsearch:
+    #elastic:
     #    restart: always
     #    image: elasticsearch:2
     #    ports:
     #      - 9200
 
+    # Uncomment the following to enable RabbitMQ support.
+    # (Make sure the service name indentation remains exactly aligned with
+    # the previous service names)
+    #rabbitmq:
+    #    restart: always
+    #    image: rabbitmq:latest
