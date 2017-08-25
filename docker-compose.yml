@@ -6,7 +6,6 @@
 version: '2'
 services:
     web:
-        container_name: proj1-m2web
         restart: always
         image: alankent/magento2devbox-web:latest
         volumes:
@@ -72,7 +71,6 @@ services:
           - 3001
 
     db:
-        container_name: proj1-m2db
         restart: always
         image: mysql:5.6
 
@@ -91,4 +89,20 @@ services:
           # Uncomment if you want the database to last after removing the
           # container. (Not recommended.)
           #- "./shared/db:/var/lib/mysql"
+
+    # Uncomment the following lines to enable Redis support.
+    # (Make sure the service name indentation remains exactly aligned with
+    # the previous service names)
+    #redis:
+    #    restart: always
+    #    image: redis:3.0.7
+
+    # Uncomment the following to enable ElasticSearch support.
+    # (Make sure the service name indentation remains exactly aligned with
+    # the previous service names)
+    #elasticsearch:
+    #    restart: always
+    #    image: elasticsearch:2
+    #    ports:
+    #      - 9200
 

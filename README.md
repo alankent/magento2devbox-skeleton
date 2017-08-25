@@ -89,11 +89,6 @@ GitHub repository to the project directory.
 Review the `docker-compose.yml` file in a text editor, making necessary
 adjustments as described by comments in the file. This includes:
 
-* You MUST ensure the container names are different per project to avoid
-  conflicts. For example, the default web service container name is
-  "proj1-m2web" and the default db service container name is "proj1-m2db".
-  Change all occurrences of "proj1" to your project name.
-
 * To enable volume mounting for the Magento source code (e.g. for Linux
   laptops), uncomment the volume mount line for `/var/www` in the provided
   `docker-compose.yml` file. For Unison (e.g. for Mac and Windows), ensure the
@@ -311,33 +306,25 @@ If you are using Unison for file syncing, you also need to start up a Unison
 process (and keep it running). It is generally recommended to start this up
 after you have installed Magento above.
 
-On Windows, get a compatible version of the Unison binaries for Windows
-from inside the container using the following (adjust "proj1-m2web" to match
-your web service container name from the `docker-compose.yml` file).
-
-    docker cp proj1-m2web:/windows/unison.exe .
-    docker cp proj1-m2web:/windows/unison-fsmonitor.exe .
-
-Then run the supplied BAT file to launch Unison in a separate window using the
-START command or by double clicking the BAT file via Windows explorer. Close
-the window to kill Unison.
+On Windows, run the supplied BAT file to launch Unison in a separate window
+using the START command or by double clicking the BAT file via Windows
+explorer. This will automatically retrieve a copy of the `unison.exe` binary
+from the web container. Close the window to kill Unison.
 
     START m2devbox-unison-sync.bat
 
-Each time you log in, make sure you restart this process, but be careful to not
-have multiple copies running in parallel. It is not recommended to do
-significant work on the project without Unison running to avoid merge conflicts
-(rare).
-
-Mac binaries and a shell script are also provided:
-
-    docker cp proj1-m2web:/macos/unison .
-    docker cp proj1-m2web:/macos/unison-fsmonitor .
-    chmod +x unison unison-fsmonitor
-
-It is recommended to run the sync shell script in a separat Terminal window.
+Mac binaries and a shell script are also provided. It is recommended to run the
+sync shell script in a separate Terminal window so you can look at its output
+if you ever need to do troubleshooting.
 
     ./m2devbox-unison-sync.sh
+
+This shell script cannot be used on Linux, only Mac OSX. Use volume mounting on
+Linux (not Unison).
+
+Each time you log in, make sure you restart Unison, but be careful to not have
+multiple copies running in parallel. It is not recommended to do significant
+work on the project without Unison running to avoid merge conflicts (rare).
 
 ### 9. Cron
 
@@ -391,7 +378,8 @@ TODO
 
 Grunt and Gulp are both frontend tool chains to speed up frontend development.
 They can both auto-recompile CSS files as soon as a file is written to disk.
-NodeJS is preinstalled in the web service container for use by Grunt and Gulp.
+NodeJS is preinstalled in the web service container for use by Grunt and Gulp,
+along with grunt-cli, gulp-cli, and browsersync.
 
 To enable Grunt support, run the following commands
 
@@ -400,27 +388,18 @@ To enable Grunt support, run the following commands
     cp package.json.sample package.json
     npm install
     grunt refresh --force
+    grunt watch
 
 For further details, please refer to the Grunt section in the "Frontend
 Developer Guide" on http://devdocs.magento/com.
 
-Magento does not ship with default Gulp support, but there is the excellent
-"frontools" community project based on Gulp. Frontools can be found at
-https://github.com/SnowdogApps/magento2-frontools. Version 0.11.4 was the last
-version with Less support (as supported by Magento). Frontools provides Sass
-replacements for the blank theme that they now support.
+Magento does not ship with Gulp support, but there are numerous articles on the
+web explaining how to use Gulp with Magento 2, such as
+https://alankent.me/2016/01/27/gulp-et-al-in-magento-2/. 
 
-If frontools is not suitable, there are numerous other articles on the web
-explaining how to set up Gulp support such as
-https://alankent.me/2016/01/27/gulp-et-al-in-magento-2/. Magento provides a
-`magento dev:source-theme:deploy` command that resolves all of the Magento file
-fallback rules, allowing Gulp or other similar pipelines to be run on the
-resultant directory tree.
-
-If you wish to run BrowserSync with Gulp (https://www.browsersync.io/), you
-will also need to edit the `docker-compose.yml` file to add the BrowserSync
-port number to the "ports" list to expose. For this to take effect, you must
-rebuild the container which will wipe all the files in the container.
+If you wish to run BrowserSync (https://www.browsersync.io/), with Gulp you
+need to ensure the BrowserSync ports (3000 and 3001) are left uncommented in
+the `docker-compose.yml` file.
 
 # Tips and Tricks
 

@@ -1,11 +1,15 @@
 REM @ECHO OFF
 
+@SET PROJ=%COMPOSE_PROJECT_NAME%
+@IF [%PROJ%] == [] (
+    REM Get current directory name.
+    FOR %%a IN (.) DO SET PROJ=%%~nxa
+)
+
 IF NOT EXIST unison.exe (
-    @ECHO The unison.exe binary could not be found. You can retrieve a
-    @ECHO compatible version from the DevBox web container using:
-    @ECHO docker cp proj1-m2web:/windows/unison.exe .
-    @ECHO docker cp proj1-m2web:/windows/unison-fsmonitor.exe .
-    GOTO exit
+    REM **** Getting unison.exe binary from web container.
+    docker cp %PROJ%_web_1:/windows/unison.exe .
+    docker cp %PROJ%_web_1:/windows/unison-fsmonitor.exe .
 )
 
 REM Add Windows\system32 to start of path to find the right "timeout" command

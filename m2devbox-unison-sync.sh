@@ -1,14 +1,15 @@
 #!/bin/bash
 
+PROJ=$COMPOSE_PROJECT_NAME
+if [[ -n $PROJ ]]; then
+    PROJ=$(basename $PWD)
+fi
+
 if [[ ! -f unison ]]; then
-    echo "The unison binary could not be found. You can retrieve a"
-    echo "compatible version from the DevBox web container using:"
-    echo ""
-    echo "   docker cp proj1-m2web:/mac-osx/unison ."
-    echo "   docker cp proj1-m2web:/mac-osx/unison-fsmonitor ."
-    echo "   chmod +x unison unison-fsmonitor"
-    echo ""
-    exit 1
+    echo "Fetching unison executable from web container."
+    docker cp ${PROJ}_web_1:/mac-osx/unison .
+    docker cp ${PROJ}_web_1:/mac-osx/unison-fsmonitor .
+    chmod +x unison unison-fsmonitor
 fi
 
 # Fetch the external Docker Unison port number
