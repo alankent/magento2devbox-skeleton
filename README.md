@@ -41,16 +41,16 @@ Mac and Windows cannot directly access the file system inside the web container
   to mount via Docker volumes for easy access directly from your laptop. These
   files are generally small in number and size for which Docker volume mounting
   works fine. By default the volume mounts are commented out in the
-  `docker-compose.yml` file.
+  `docker-compose.yml` file for improved performance.
 
 * Some frontend developer tools like Gulp and Grunt rely on file watching
-  "iNotify" file system events. Volume mounting on Windows does not support
-  iNotify events at this time.
+  "iNotify" file system events. Docker Volume mounting on Windows does not
+  support iNotify events at this time.
 
-Where volume mounts are not suitable (that is, the Magento source code
+Where volume mounts are not suitable (specifically, the Magento source code
 directory on Mac and Windows), DevBox syncs the local and container file
 systems using a program called Unison. Whenver a file in the watched local file
-system is changed, it is coped into the web container, and vice versa. This
+system is changed, it is copied into the web container, and vice versa. This
 allows IDEs to be natively used on a laptop (or desktop) - Unison copies file
 changes as soon as they are written to disk into the web conatiner.
 
@@ -75,11 +75,12 @@ ready to get up and going with DevBox.
 ### 1. Create a Local Project Directory
 
 Create a new directory per project. Download a copy of the files in this
-project to a empty directory.
+GitHub repository to the project directory.
 
   * Go to http://github.com/alankent/magento2devbox-skeleton
   * In the "Branch" drop down, select the tag closest to the project's version
     of Magento. This is to get the correct version of PHP, MySQL, etc.
+    If in doubt, pick "master" (the default).
   * Click on the green button "Clone or Download" and select "Download ZIP".
   * Extract the ZIP file contents into the project directory.
 
@@ -103,62 +104,68 @@ adjustments as described by comments in the file. This includes:
   always 8080. You cannot run different containers at the same time using
   the same port numbers.
 
+* The recommended way to create and update projects is via Composer, a PHP
+  package manager. Magento provides a Composer repository from which Magento
+  (and extensions purchased from Magento Marketplace) can be downloaded.
+  Composer caches downloads for performance. Mounting the cache directory on
+  your laptop is enabled by uncommenting the "~/.composer" volume mount in the
+  `docker-compose.yml` file. This allows downloads to be shared betwen
+  containers (e.g. on different projects). If you do not mount a directory, the
+  cache will discarded when the container is removed.
+
 ### 3. Launch the Containers
 
-Launch the containers using:
+Launch the containers by changing to the project directory and then running:
 
     docker-compose up -d
-
-To get a bash prompt inside the web container, use
-
-    docker-compose exec web bash
-
-You should see a shell prompt of `m2$`.
 
 You can check what containers exist using
 
     docker ps -a
 
-### 4. Composer Configuration
+To get a bash prompt inside the web container, use
 
-The recommended way to create and update projects is via Composer, a PHP
-package manager. Magento provides a Composer repository from which Magento
-(and extensions purchased from Magento Marketplace) can be downloaded.
+    docker-compose exec web bash
 
-Composer caches downloads for performance. Mounting the cache directory on your
-laptop is enabled by uncommenting the "~/.composer" volume mount in the
-`docker-compose.yml` file. This allows downloads to be shared betwen containers
-(e.g. on different projects). If you do not mount a directory, the cache will
-discarded when the container is removed.
+You should see a shell prompt of `m2$`. If you are using the Git Bash window,
+you may see an error message saying you need to use `winpty`. In that case
+you must use the following command to create a bash prompt.
 
-The first time you run Composer, it may prompt you for a username and password.
-Enter your 'public' and 'private' keys from http://marketplace.magento.com/,
-"My Profile", "Access keys" when prompoted. Be aware that an `auth.json`
-file holding your keys will be saved into `~/.composer/`. You may want to share
-the Composer downloaded files but have a different `auth.json` file per project
-by moving the `auth.json` file into your project's home directory (but not
-committing this file to git for security reasons).
+    winpty docker-compose exec web bash
 
-### 5. Install Magento
+### 4. Install Magento
 
 Next you need to install your Magento project inside the web container under
 the `/var/www/magento2` directory. (Apache is configured by default to use
 `magento2` as the document root.) There are multiple options here.
 
+Note: The first time you run Composer in the following steps, it may prompt you
+for a username and password. Enter your 'public' and 'private' keys from
+http://marketplace.magento.com/, "My Profile", "Access keys" when prompoted. Be
+aware that an `auth.json` file holding your keys will be saved into
+`~/.composer/`. You may want to share the Composer downloaded files but have a
+different `auth.json` file per project by moving the `auth.json` file into your
+project's home directory (but not committing this file to git for security
+reasons).
+
 **Existing Project**
 
 If you have an existing project with all the source code already under
-`shared/www`, you can skip this section. If you use volume mounting, the code
-will automatically be visible; if you use Unison, it will copy files on your
-laptop into the web container when Unison is started. No additional
-configuration is required.
+`shared/www`, no additional configuration is needed. If you use volume
+mounting, the code will automatically be visible; if you use Unison, it will
+copy files on your laptop into the web container when Unison is started.
 
-Note: If you decide to change the settings in `docker-composer.yml` after the
-containers have been created, you will need to remove the current containers
-and recreate them (including the database contents). This falls under the
-'existing project' use case. MAKE SURE THE SOURCE CODE IS UP TO DATE UNDER THE
-`shared/www` DIRECTORY BEFORE DELETING THE CONTAINERS TO MAKE SURE YOU DO NOT
-ACCIDENTALLY LOSE ANY OF YOUR WORK.
+Note: This case includes if you decide to change the settings in
+`docker-composer.yml` after the containers have been created. You will need to
+remove the current containers and recreate them (including the database
+contents). MAKE SURE THE SOURCE CODE IS UP TO DATE UNDER THE `shared/www`
+DIRECTORY BEFORE DELETING THE CONTAINERS TO MAKE SURE YOU DO NOT ACCIDENTALLY
+LOSE ANY OF YOUR WORK.
+
+    docker-compose kill
+    docker-compose rm
+    # Make changes to docker-compose.yml
+    docker-compose up -d
 
 **Creating a New Project with Composer**
 
@@ -169,8 +176,9 @@ Log into the web container.
 Create a new project under `/var/www/magento2`. (Update the project version
 number as appropriate.)
 
-    mkdir /var/www/magento2
-    cd /var/www/magento2
+    cd /var/www
+    mkdir magento2
+    cd magento2
     composer create-project --repository=https://repo.magento.com/ magento/project-community-edition:2.1.8 .
     chmod +x bin/magento
 
@@ -232,7 +240,7 @@ Log on to the bash prompt inside the web container
 
 Tun the following commands to create a MyQL database to use.
 
-    mysql -e 'CREATE DATABASE IF NOT EXIST magento2;'
+    mysql -e 'CREATE DATABASE IF NOT EXISTS magento2;'
 
 After the database is created, uncomment the line setting the default
 database in the MySQL `~/.my.cnf` file.
@@ -242,15 +250,14 @@ database in the MySQL `~/.my.cnf` file.
     > SHOW TABLES;
     > exit;
 
-Put the site into developer mode.
-
-    cd /var/www/magento2
-    magento deploy:mode:set developer
-
 Set up all the Magento 2 tables with the following command (adjusting command
 line paramter values as desired).
 
-    magento setup:install --db-host=db --db-name=magento2 --db-user=root --db-password=magento2 --admin-firstname=Magento --admin-lastname=Administrator --admin-email=user@example.com --admin-user=admin --admin-password=admin123 --language=en_US --currency=USD --timezone=America/Chicago --use-rewrites=1 --backend-frontname=admin
+    magento setup:install --db-host=db --db-name=magento2 --db-user=root --db-password=root --admin-firstname=Magento --admin-lastname=Administrator --admin-email=user@example.com --admin-user=admin --admin-password=admin123 --language=en_US --currency=USD --timezone=America/Chicago --use-rewrites=1 --backend-frontname=admin
+
+Put the site into developer mode.
+
+    magento deploy:mode:set developer
 
 It is recommended to NOT include the `--base_url` option during development as
 Docker can allocate a port number at random (including when container is
@@ -264,9 +271,21 @@ be added when the project is created.
 
     --amqp-virtualhost=/ --ampq-host=ampq --amqp-port=TODO --amqp-user=guest --amqp-password=guest
 
-To load the Luma sample data (optional), run the following additional commands.
+**Loading Optional Sample Data**
+
+To download the Luma sample data, you may need to provide Composer
+authentication details. If you already have a `~/.composer/auth.json` file you
+can run
+
+    COMPOSER_AUTH=$(cat ~/.composer/auth.json) magento sampledata:deploy
+
+Otherwise run the following command and enter your public and private keys when
+prompted.
 
     magento sampledata:deploy
+
+To load the sample data into the database, run
+
     magento setup:upgrade
 
 ### 7. Start Unison, if Needed
@@ -276,8 +295,8 @@ process (and keep it running). It is generally recommended to start this up
 after you have installed Magento above.
 
 On Windows, get a compatible version of the Unison binaries for Windows
-from inside the container using the following (adjust "proj1-m2web" to your
-web container name from the `docker-compose.yml` file).
+from inside the container using the following (adjust "proj1-m2web" to match
+your web service container name from the `docker-compose.yml` file).
 
     docker cp proj1-m2web:/windows/unison.exe .
     docker cp proj1-m2web:/windows/unison-fsmonitor.exe .
@@ -315,7 +334,21 @@ load a page you will see significantly longer load times.
 
 ### 9. Cron
 
-TODO: By default, to save batteries/energy, cron is disabled. Running cron in container can result in faster laptop battery drainging. To enable cron, you can follow the instructions in the documentation http://devdocs.magento.com/guides/v2.1/install-gde/docker/docker-commands.html.
+Cron is disabled by default. Running cron may result in faster draining of
+laptop batteries. To manually trigger background index updates, run `magento
+cron:run` twice in a row (sometimes the first cron schedules jobs for the
+second cron to run)
+
+    magento cron:run
+    magento cron:run
+
+To enable cron permanently run the following command.
+
+    cat <<EOF | crontab -
+    * * * * * /usr/local/bin/php /var/www/magento2/bin/magento cron:run | grep -v "Ran jobs by schedule" >> /var/www/magento2/var/log/magento.cron.log
+    * * * * * /usr/local/bin/php /var/www/magento2/update/cron.php >> /var/www/magento2/var/log/update.cron.log
+    * * * * * /usr/local/bin/php /var/www/magento2/bin/magento setup:cron:run >> /var/www/magento2/var/log/setup.cron.log
+    EOF
 
 ### 10. Configure PHP Storm (if appropriate)
 

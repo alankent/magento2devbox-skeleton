@@ -11,6 +11,11 @@ services:
         image: magento2devbox-web:latest
         volumes:
 
+          # LEAVE THIS LINE COMMENTED OUT IF YOU ARE USING UNISON.
+          # Uncomment to use Docker volume mounts to share files with
+          # local file system.
+          #- "./shared/www:/var/www"
+
           # Uncomment to share your ~/.ssh directory with the container.
           # This can be useful for GitHub ssh keys and similar.
           #- "~/.ssh:/home/magento2/.ssh"
@@ -19,10 +24,6 @@ services:
           # download cache between projects (more efficient, but
           # means the auth.json file will also be shared).
           #- "~/.composer:/home/magento2/.composer"
-
-          # Uncomment to use Docker volume mounts to share files with
-          # local file system. Not recommendd on Windows (use Unison instead).
-          #- "./shared/www:/var/www"
 
           # Uncomment to mount local directory for apache log files.
           #- "./shared/logs/apache2:/var/log/apache2"
@@ -65,12 +66,16 @@ services:
           - MAGENTO_ADMIN_USER=admin
           - MAGENTO_ADMIN_PASSWORD=admin123
         ports:
-          # Pick a random unused web server port. (Use 8080:80)
+
+          # Pick a random unused web server port. (Use 8080:80 for a fixed
+          # port number.)
           - 80
-          # Pick a random SSH port. (Use 22:22 to force it to be 22 locally)
+
+          # Pick a random SSH port. (Use 22:22 to force it to be 22 locally.)
           - 22
-          # Pick a random unused unison port.
-          # (Only needed if using Unison for file syncing.)
+
+          # Pick a random unused Unison port.
+          # (Can be commented out if not using Unison.)
           - 5000
 
     db:
@@ -83,8 +88,9 @@ services:
           - MYSQL_ROOT_PASSWORD=root
           - MYSQL_DATABASE=magento2
         volumes:
+
           # Uncomment if you want the database to live after removing the
-          # containers. (Can be confusing.)
+          # containers. (Not recommended, can be confusing.)
           #- "./shared/db:/var/lib/mysql"
 
           # Uncomment to mount log files locally.
