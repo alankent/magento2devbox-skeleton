@@ -1,131 +1,72 @@
 # Introduction
 
-This repository is part of the Magento DevBox project, a simple way to install
-a Magento 2 development environment. This is NOT intended for production
-usage.
+This repository is part of the Magento DevBox project, a Magento 2 development
+environment. This is NOT intended for production usage.
 
 Please note, a previous version of DevBox included a web site with GUI to
 preconfigure your installation. While useful to get going, developers still
 needed to understand the underlying commands. The new DevBox has less 'magic',
-resulting in these instructions being longer, but developers have more control.
+resulting in these instructions being longer, but developers having more
+control.
 
-## General Mode of Operation
+## General Operation
 
-DevBox contains all the the packages you will need to run Magento
-during development, except for IDEs and web browsers. A local development
-environment typically starts with a database container (holding MySQL) and a
-web server container (holding the Magento source code). Other containers can be
-added as required for Varnish (recommended), Redis, RabbitMQ, and
-ElasticSearch.  All containers run Linux on the inside.
+DevBox contains all the the software packages you need to develop a Magento
+site, except for IDEs and web browsers. A local development environment
+typically starts with a database container (holding MySQL) and a web server
+container (holding the Magento source code). Other containers can be added as
+required for Varnish (recommended), Redis, RabbitMQ, and ElasticSearch. All
+containers run Linux inside.
 
 The container developers interact with the most is the web container. The
 other containers are relatively shrink wrap.
 
-All of the Magento source code is held inside the web container. If you wish to
-use an IDE with the source code on your laptop/desktop, they cannot access the
-Docker container file system directory. You can instead either use Docker
-volume mounting or Unison to do a bidirectional file sync between the container
-and your local file system. Docker volume mounts can be slower in general and
-have limitations on Windows, while Unison requires an extra program to be
-run during development.
-
-Normally you set up a container and use it for a long time, removing it only
+Normally you set up containers and use them for a long time, removing them only
 when no longer required. Containers can be 'stopped' without being 'removed' to
-save CPU and memory resources while not in use. Make sure you carefully read
-the file syncing section before removing any containers to avoid deleting 
-your work by accident.
+save CPU and memory resources while not in use.
 
-# File Syncing
+## File Syncing
 
-File syncing is where the Magento source code in the web container is made
-available directly on your native laptop/desktop file system. Windows and Mac
-cannot access the file system inside a Docker container directly.
+Mac and Windows cannot directly access the file system inside the web container
+(Linux can). This has a number of implications.
 
-If you are happy with a text editor such as vi or nano inside the container,
-file sharing configuration is not required. It does however mean that if the
-container is removed or damaged (rare), all source code changes in the
-container will be lost. Using file syncing can add an extra level of protection
-if desired.
+* Most developers prefer to use a IDE such as PHP Storm for development. PHP
+  Storm has special support for "remote PHP interpeters" via ssh. This makes
+  source code development and debugging using PHP Storm relatively painless
+  even when PHP and the web server are running inside a Docker container.
+  However, PHP Storm does need access to the the source code.
 
-Most developers however prefer to use a IDE such as PHP Storm for development.
-(PHP Storm has special support for "remote PHP interpeters" via ssh.
-This makes source code development and debugging using PHP Storm relatively
-painless even when PHP and the web server are running inside DevBox.)
-Such IDEs generally work best when run on the local file system. The issue is
-they cannot access the file system inside the Docker container without
-additional configuration.
+* There are several directories (such as log directories) which you can choose
+  to mount via Docker volumes for easy access directly from your laptop. These
+  files are generally small in number and size for which Docker volume mounting
+  works fine. By default the volume mounts are commented out in the
+  `docker-compose.yml` file.
 
-There are several directories (such as log files) which you may wish to mount
-for easy access. These files are generally small in number and size and Docker
-volume mounting works fine. They are commented out by default in the
-`docker-compose.yml` file.
+* Some frontend developer tools like Gulp and Grunt rely on file watching
+  "iNotify" file system events. Volume mounting on Windows does not support
+  iNotify events at this time.
 
-The main Magento source code however is much larger and stresses the native
-Docker file system mounting support. As such, you need to decide which way you
-personally find best to use DevBox, as there are different pros and cons with
-each of the approaches. You need to decide which approach you are going to use
-before installing Magento inside the container. 
+Where volume mounts are not suitable (that is, the Magento source code on Mac
+and Windows), DevBox syncs the local and container file systems using a program
+called Unison. Whenver a file in the watched local file system is changed, it
+is coped into the web container, and vice versa. This allows IDEs to be
+natively used on a laptop (or desktop) - Unison copies file changes as soon as
+they are made into the web conatiner.
 
-In addition, some frontend developer tools like Gulp and Grunt rely on file
-watching "iNotify" events from the Linux file system kernel. Volume mounting on
-Windows does not support iNotify events at this time. It is not recommended
-to use volume mounting for the Magento source code on Windows for this reason.
+**Enabling Volume Mounts**
 
-The following discussion focusses on the Magento code base, not the other
-volume mount points.
+To enable volume mounting for the Magento source code (e.g. for Linux laptops),
+uncomment the relevant volume mount line for `/var/www` in the provided
+`docker-compose.yml` file. For Unison (e.g. for Mac and Windows), ensure the
+line is commented out.
 
-## Docker Volume Mounting
-
-On Mac, using native Docker volume mounting works, but can reduce performance.
-The benefit however is you don't need to manage Unison. Generally however
-Unison is recommended for the performance boost it offers.
-
-On Windows, using native Docker volume mounting also works, but can reduce
-performance and file watching tools will not work. Unison is therefore always
-recommended on Windows.
-
-To enable volume mounting, uncomment the volume mount line for `/var/www`
-in the provided `docker-compose.yml` file. For Unison, ensure the line is
-commented out.
-
-## Unison
-
-Unison is an open source bi-diretional file syncing tool. It can be used to
-sync a local file system with a remote file system over a network connection.
-In the case of DevBox, the container can be considered a 'remote' server.
-(Unison is similar in concept to rsync, but more portable and bidirectional.)
-
-One interesting potential advantage of Unison is it may enable similar
-development running the DevBox Docker containers on a server in the cloud. The
-DevBox containers are NOT designed for this however as they open public,
-passwordless ports for easier developer access. It is assumed the developer has
-a trusted local environment on their laptop/desktop where the Docker containers
-will be run.
-
-The main advantage of Unison is all file system operations are standard.
-iNotify generates all events correctly. The web server and IDE can run at full
-speed as they both access local files, so performance is pretty good.
-
-The disavantage of Unison is it is one more application to run. It can hang
-at times (although it is pretty stable). There can also be a slight lag
-between saving a file and it arriving on the other server. This can result in
-a slight chance of race conditions if making changes on both the local file
-system and inside the container at the same time. You also need to remember to
-restart it if you log off. Unison is however the best of the set of currently
-available choices for Windows.
-
-When using Unison, make sure the volume mount for `/var/www` is commented out
-in the `docker-compose.yml` file (the default).
+**Enabling Unison**
 
 For Windows, a BAT file is provided with the appropriate command line options
 to run Unison. For Mac, a shell script is provided. The scripts will restart
 Unison automatically if the web container is restarted for some reason.
-
-Unison normally reports files it copies to the console as it runs. This can be
-useful to check when troubleshooting). However for the first sync when there
-are a large number of files outputting messages to the console significantly
-slows down the first sync. For that reason the scripts run Unison once
-discarding output, and then starts Unison in file watch mode.
+The script also does an optimized first pass to reduce noise on the console
+(it normally reports every synchronized file).
 
 On Windows, the easiest way to launch Unison is to run the Unison BAT file
 in its own window using the START command or by double clicking on the BAT
@@ -136,13 +77,6 @@ file from Windows file explorer.
 On Mac, it is recommended to run the script in a separate Terminal window.
 
     ./m2devbox-unison-sync.sh
-
-## Docker-Sync.io
-
-You may wish to have a look at http://docker-sync.io/, a Docker container that
-supports multiple ways of syncing a file system. On Mac you may prefer to use
-one of its options. Docker-sync configuration is however not described further
-here.
 
 # Getting Started
 
