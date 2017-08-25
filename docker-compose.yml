@@ -37,8 +37,13 @@ services:
         environment:
           # Optional. If set, container will create a default auth.json
           # file for Composer to use (if one does not already exist).
-          #- MAGENTO_PUBLIC_KEY=<insert-hex-key-here>
-          #- MAGENTO_PRIVATE_KEY=<insert-hex-key-here>
+          # (Download keys are a long hex sequence available from
+          # http://marketplace.magento.com/, "My Profile", "My Access Keys")
+          # Generally it is not recommended to commit keys to a git repo
+          # for security reasons - it grants all viewers permission to download
+          # all your Marketplace purchases.
+          - MAGENTO_PUBLIC_KEY=
+          - MAGENTO_PRIVATE_KEY=
 
         # The following exposes ports inside the container publicly.
         # Docker maps the public port numbers to ports inside the container
