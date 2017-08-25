@@ -8,7 +8,7 @@ services:
     web:
         container_name: proj1-m2web
         restart: always
-        image: magento2devbox-web:latest
+        image: alankent/magento2devbox-web:latest
         volumes:
 
           # LEAVE THIS LINE COMMENTED OUT IF YOU ARE USING UNISON.
@@ -35,6 +35,7 @@ services:
           #- "./shared/.magento-cloud:/home/magento2/.magento-cloud"
 
         environment:
+          # TODO: Prune back these variables.
           - SHARED_CODE_PATH="/home/magento2/magento2"
           - USE_RABBITMQ=0
           - USE_REDIS_FULL_PAGE_CACHE=0
