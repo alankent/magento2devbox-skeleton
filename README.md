@@ -424,6 +424,10 @@ Tell any configured external caches (e.g. Redis) to clean themselves.
 
     magento cache:clean
 
+Run shell script to remove all generated files and clean all caches.
+
+    clean-generated
+
 To run cron by hand if not running automatically (run this twice to gurantee
 all jobs are queued and run).
 
