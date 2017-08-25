@@ -6,7 +6,7 @@
 version: '2'
 services:
     web:
-        container_name: m2web
+        container_name: proj1-m2web
         restart: always
         image: magento2devbox-web:latest
         volumes:
@@ -74,7 +74,7 @@ services:
           - 5000
 
     db:
-        container_name: m2db
+        container_name: proj1-m2db
         restart: always
         image: mysql:5.6
         ports:

@@ -18,8 +18,8 @@ container (holding the Magento source code). Other containers can be added as
 required for Varnish (recommended), Redis, RabbitMQ, and ElasticSearch. All
 containers run Linux inside.
 
-The container developers interact with the most is the web container. The
-other containers are relatively shrink wrap.
+Developers mainly interact with the web container. The other containers are
+relatively shrink wrap.
 
 Normally you set up containers and use them for a long time, removing them only
 when no longer required. Containers can be 'stopped' without being 'removed' to
@@ -34,7 +34,8 @@ Mac and Windows cannot directly access the file system inside the web container
   Storm has special support for "remote PHP interpeters" via ssh. This makes
   source code development and debugging using PHP Storm relatively painless
   even when PHP and the web server are running inside a Docker container.
-  However, PHP Storm does need access to the the source code.
+  However, PHP Storm does need access to the the source code for editing and
+  debugging.
 
 * There are several directories (such as log directories) which you can choose
   to mount via Docker volumes for easy access directly from your laptop. These
@@ -46,39 +47,14 @@ Mac and Windows cannot directly access the file system inside the web container
   "iNotify" file system events. Volume mounting on Windows does not support
   iNotify events at this time.
 
-Where volume mounts are not suitable (that is, the Magento source code on Mac
-and Windows), DevBox syncs the local and container file systems using a program
-called Unison. Whenver a file in the watched local file system is changed, it
-is coped into the web container, and vice versa. This allows IDEs to be
-natively used on a laptop (or desktop) - Unison copies file changes as soon as
-they are made into the web conatiner.
+Where volume mounts are not suitable (that is, the Magento source code
+directory on Mac and Windows), DevBox syncs the local and container file
+systems using a program called Unison. Whenver a file in the watched local file
+system is changed, it is coped into the web container, and vice versa. This
+allows IDEs to be natively used on a laptop (or desktop) - Unison copies file
+changes as soon as they are written to disk into the web conatiner.
 
-**Enabling Volume Mounts**
-
-To enable volume mounting for the Magento source code (e.g. for Linux laptops),
-uncomment the relevant volume mount line for `/var/www` in the provided
-`docker-compose.yml` file. For Unison (e.g. for Mac and Windows), ensure the
-line is commented out.
-
-**Enabling Unison**
-
-For Windows, a BAT file is provided with the appropriate command line options
-to run Unison. For Mac, a shell script is provided. The scripts will restart
-Unison automatically if the web container is restarted for some reason.
-The script also does an optimized first pass to reduce noise on the console
-(it normally reports every synchronized file).
-
-On Windows, the easiest way to launch Unison is to run the Unison BAT file
-in its own window using the START command or by double clicking on the BAT
-file from Windows file explorer.
-
-    START m2devbox-unison-sync.bat
-
-On Mac, it is recommended to run the script in a separate Terminal window.
-
-    ./m2devbox-unison-sync.sh
-
-# Getting Started
+# Installation
 
 Now you understand what file syncing approach you are going to use, you are now
 ready to get up and going with DevBox.
@@ -86,49 +62,46 @@ ready to get up and going with DevBox.
 ## Prerequisites
 
 * Install a recent version of Docker from http://docker.com/. Docker is
-  available for Windows, Mac, and Linux. Volume mounting (described below)
-  is not recommended for older versions of Docker or when using Docker inside
-  VirtualBox on Windows.
+  available for Windows, Mac, and Linux. 
 * As part of the Docker installation process, on Windows 10 you may need to
   turn on Hyper-V and then grant Docker access to the `C:` drive for Docker to
   mount volumes correctly. This is described in the Docker documentation.
-  Please note that turning on Hyper-V disables VirtualBox. If you run Docker
-  in VirtualBox, please be aware that VirtualBox will have its own IP address
-  (unlike Docker running in Hyper-V that default is accessed using
-  "localhost").
 * On Windows, it can be useful to install "Git Bash"
   (https://git-for-windows.github.io/). As well as Git, it includes a terminal
-  emulator that works well with Docker as well as a small collection of Linux
-  commands.
+  emulator as well as a useful collection of Linux commands.
 
 ## Setting Up a New Environment
 
 ### 1. Create a Local Project Directory
 
-To start a new project, download a copy of the files in this project to a
-new empty directory. Normally you create a directory per project. (Developers
-at an system integrator or agency may work on multiple projects at once, one
-directory per project.) This project holds starter files for your project.
+Create a new directory per project. Download a copy of the files in this
+project to a empty directory.
 
-GitHub provides a "download ZIP" option if you don't have git installed 
-locally.
-
-  * TODO: http://github.com/alankent/magento2devbox-skeleton
+  * Go to http://github.com/alankent/magento2devbox-skeleton
+  * In the "Branch" drop down, select the tag closest to the project's version
+    of Magento. This is to get the correct version of PHP, MySQL, etc.
   * Click on the green button "Clone or Download" and select "Download ZIP".
-  * Extract the ZIP file contents into an empty directory.
+  * Extract the ZIP file contents into the project directory.
 
 ### 2. Review and Update the docker-compose.yml File
 
-Review the `docker-compose.yml` file in a text editor for adjustments such as
-preferred local port numbers. There are comments in the file describing
-the settings you are most likely to change.
+Review the `docker-compose.yml` file in a text editor, making necessary
+adjustments as described by comments in the file. This includes:
 
-If you work on multiple projects, create a separate directory per project (e.g.
-"proj1", "proj2", etc). DevBox is not designed to switch between projects. You
-must ensure the container names are different per project to avoid conflicts.
-For example, the default web container name is "m2web" (NOT "web") and the
-default database container is "m2db". Change these to "proj1-m2web" and
-"proj1-m2db" to match your project name. 
+* You MUST ensure the container names are different per project to avoid
+  conflicts. For example, the default web service container name is
+  "proj1-m2web" and the default db service container name is "proj1-m2db".
+  Change all occurrences of "proj1" to your project name.
+
+* To enable volume mounting for the Magento source code (e.g. for Linux
+  laptops), uncomment the volume mount line for `/var/www` in the provided
+  `docker-compose.yml` file. For Unison (e.g. for Mac and Windows), ensure the
+  line is commented out.
+
+* Check the port numbers. By default Docker will allocate random free port
+  numbers. Change "80" to "8080:80" if you want the web server port to be
+  always 8080. You cannot run different containers at the same time using
+  the same port numbers.
 
 ### 3. Launch the Containers
 
@@ -142,54 +115,29 @@ To get a bash prompt inside the web container, use
 
 You should see a shell prompt of `m2$`.
 
-You can check what containers are running using
-
-    docker ps
-
-You can also see what containers exist but are currently not running using
+You can check what containers exist using
 
     docker ps -a
 
 ### 4. Composer Configuration
 
-This section is optional, but includes Composer performance optimizations worth
-considering if you work on multiple projects.
-
 The recommended way to create and update projects is via Composer, a PHP
 package manager. Magento provides a Composer repository from which Magento
 (and extensions purchased from Magento Marketplace) can be downloaded.
 
-There is also a Magento ZIP download which is faster to download, but you will
-need to use Composer at some stage to install patches or extensions, so it is
-recommended to start with Composer from day 1.
-
-Composer supports a download cache. Having this mounted to a local directory on
-your laptop allows downloads to be shared betwen containers. Cached downloads
-make subsequent upgrades and new installs much faster. If you do not mount a
-shared volume for this directory, you cannot share the cache between containers
-and the cache will be lost when the container is removed. There is nothing
-wrong with this other than a potentially larger network bill for downloads and
-slower startup time for subsequent new projects.
-
-Be aware the Composer can be slow to run at times. Give it a minute or two even
-if no output is occurring.
-
-DevBox sets the `COMPOSER_HOME` environment variable to
-`/home/magento2/.composer`.
+Composer caches downloads for performance. Mounting the cache directory on your
+laptop is enabled by uncommenting the "~/.composer" volume mount in the
+`docker-compose.yml` file. This allows downloads to be shared betwen containers
+(e.g. on different projects). If you do not mount a directory, the cache will
+discarded when the container is removed.
 
 The first time you run Composer, it may prompt you for a username and password.
 Enter your 'public' and 'private' keys from http://marketplace.magento.com/,
-"My Profile", "Access keys" when prompoted. Just be aware that an `auth.json`
+"My Profile", "Access keys" when prompoted. Be aware that an `auth.json`
 file holding your keys will be saved into `~/.composer/`. You may want to share
 the Composer downloaded files but have a different `auth.json` file per project
 by moving the `auth.json` file into your project's home directory (but not
 committing this file to git for security reasons).
-
-To summarize, the easiest thing is to do nothing - not mount a shared composer
-repository. For those wanting the improved performance, it is recommended to
-uncomment the line in the `docker-compose.yml` file to volume mount the
-`/home/magento2/.composer` directory. Manually create ~/.composer on your
-laptop if it does not already exist.
 
 ### 5. Install Magento
 
@@ -202,25 +150,24 @@ the `/var/www/magento2` directory. (Apache is configured by default to use
 If you have an existing project with all the source code already under
 `shared/www`, you can skip this section. If you use volume mounting, the code
 will automatically be visible; if you use Unison, it will copy files on your
-laptop into the web container when Unison is started. Not additional
+laptop into the web container when Unison is started. No additional
 configuration is required.
 
-Note: If you decide to change the settings in `docker-composer.yml` after
-the containers have been created, you will need to remove the current
-containers and recreate them. This falls under the 'existing project' use case.
-MAKE SURE THE SOURCE CODE IS UP TO DATE UNDER THE `shared/www` DIRECTORY BEFORE
-DELETING THE CONTAINERS TO MAKE SURE YOU DO NOT ACCIDENTALLY LOSE ANY OF YOUR
-WORK.
+Note: If you decide to change the settings in `docker-composer.yml` after the
+containers have been created, you will need to remove the current containers
+and recreate them (including the database contents). This falls under the
+'existing project' use case. MAKE SURE THE SOURCE CODE IS UP TO DATE UNDER THE
+`shared/www` DIRECTORY BEFORE DELETING THE CONTAINERS TO MAKE SURE YOU DO NOT
+ACCIDENTALLY LOSE ANY OF YOUR WORK.
 
-**Creating a New Project**
+**Creating a New Project with Composer**
 
-The following commands create a new, default, project.
-
-First log into the web container.
+Log into the web container.
 
     docker-compose exec web bash
 
-Then create a new project under `/var/www/magento2`. Update the project version number below as appropriate.
+Create a new project under `/var/www/magento2`. (Update the project version
+number as appropriate.)
 
     mkdir /var/www/magento2
     cd /var/www/magento2
@@ -229,9 +176,8 @@ Then create a new project under `/var/www/magento2`. Update the project version 
 
 **Getting Code from a GitHub Project**
 
-Saving your code in a private git repository on a hosting provider such as
-GitHub or BitBucket is strongly recommended. Project structures can change
-between developers, but the following is a possible example.
+It is strongly recommended to saving your project code in a private git
+repository on a hosting provider such as GitHub or BitBucket.
 
 Log into the web container:
 
@@ -241,7 +187,7 @@ Check out the project from inside the container into the `magento2` directory.
 
     cd /var/www
     git clone https://github.com/mycompany/myproject.git magento2
-    cd /var/www/magento2
+    cd magento2
     composer install
 
 **Magento Commerce (Cloud)**
@@ -250,9 +196,10 @@ TODO
 
 **Internal Development**
 
-This section is relevant to internal Magento developers, or external developers
-wishing to submit a pull request. The following is NOT recommended for
-production sites. (It may however be worth exploring by extension developers.)
+This section is ONLY relevant to internal Magento developers, or external
+developers wishing to submit a pull request. The following is NOT recommended
+for production sites. (It may however be worth exploring by extension
+developers.)
 
 Log into the web container:
 
@@ -287,17 +234,15 @@ Tun the following commands to create a MyQL database to use.
 
     mysql -e 'CREATE DATABASE IF NOT EXIST magento2;'
 
-After the database is created, you can uncomment the line setting the default
-database in the MySQL `~/.my.cnf` file so that when you run `mysql` from the
-command prompt it will log you in and select the `magento2` database by
-default. (If this is set when the database does not exist, `mysql` will fail to
-start.) This is not mandatory, but is convenient.
+After the database is created, uncomment the line setting the default
+database in the MySQL `~/.my.cnf` file.
 
+    sed -e 's/#database/database/' -i ~/.my.cnf
     mysql
     > SHOW TABLES;
     > exit;
 
-Next, put the site into developer mode.
+Put the site into developer mode.
 
     cd /var/www/magento2
     magento deploy:mode:set developer
@@ -305,25 +250,22 @@ Next, put the site into developer mode.
 Set up all the Magento 2 tables with the following command (adjusting command
 line paramter values as desired).
 
-    cd /var/www/magento2
     magento setup:install --db-host=db --db-name=magento2 --db-user=root --db-password=magento2 --admin-firstname=Magento --admin-lastname=Administrator --admin-email=user@example.com --admin-user=admin --admin-password=admin123 --language=en_US --currency=USD --timezone=America/Chicago --use-rewrites=1 --backend-frontname=admin
 
 It is recommended to NOT include the `--base_url` option during development as
 Docker can allocate a port number at random (including when container is
 restarted). It also causes problems using BrowserSync and similar tools for
-frontend development. (Some versions of Magento however have a bug requiring
+frontend development. Some versions of Magento however have a bug requiring
 `--base_url` to be specified. If the URL to CSS files is incorrect, you may
-have a broken version of Magento.)
+have a broken version of Magento.
 
 If you are using RabbitMQ (AMPQ), the following command line arguments should
 be added when the project is created.
 
     --amqp-virtualhost=/ --ampq-host=ampq --amqp-port=TODO --amqp-user=guest --amqp-password=guest
 
-If you want to load the Luma sample data (optional), run the following
-additional commands.
+To load the Luma sample data (optional), run the following additional commands.
 
-    cd /var/www/magento2
     magento sampledata:deploy
     magento setup:upgrade
 
@@ -334,29 +276,27 @@ process (and keep it running). It is generally recommended to start this up
 after you have installed Magento above.
 
 On Windows, get a compatible version of the Unison binaries for Windows
-from inside the container using the following (adjust "m2web" to your
-web container name from the `docker-compose.yml` file - there is no
-`docker-compose cp` command at this time so you cannot use "web", the service
-name).
+from inside the container using the following (adjust "proj1-m2web" to your
+web container name from the `docker-compose.yml` file).
 
-    docker cp m2web:/windows/unison.exe .
-    docker cp m2web:/windows/unison-fsmonitor.exe .
+    docker cp proj1-m2web:/windows/unison.exe .
+    docker cp proj1-m2web:/windows/unison-fsmonitor.exe .
 
-Then run the supplied BAT file in a separate window using the START command or
-by double clicking via Windows explorer. Close the window to kill Unison.
+Then run the supplied BAT file to launch Unison in a separate window using the
+START command or by double clicking the BAT file via Windows explorer. Close
+the window to kill Unison.
 
     START m2devbox-unison-sync.bat
 
 Each time you log in, make sure you restart this process, but be careful to not
-have multiple copies running. If you stop work on the project, you can close
-this window and start it up again later.  It is not recommended to do
+have multiple copies running in parallel. It is not recommended to do
 significant work on the project without Unison running to avoid merge conflicts
 (rare).
 
 Mac binaries and a shell script are also provided:
 
-    docker cp m2web:/macos/unison .
-    docker cp m2web:/macos/unison-fsmonitor .
+    docker cp proj1-m2web:/macos/unison .
+    docker cp proj1-m2web:/macos/unison-fsmonitor .
     chmod +x unison unison-fsmonitor
 
 It is recommended to run the sync shell script in a separat Terminal window.
@@ -365,12 +305,7 @@ It is recommended to run the sync shell script in a separat Terminal window.
 
 ### 8. Connect with a Web Browser
 
-To access the web server, if you set the web port using the {localport}:80
-syntax (e.g. 8080:80), access the page using the specified localport (e.g.
-http://localhost:8080/). If you did not specify a local port, a random port
-that is not currently in use will be allocated by Docker. You can use
-`docker-compose` with the server name "web" to fetch the local port number
-that is bound to the web server port.
+Run the following command to determine the web server port number.
 
     docker-compose port web 80
 
