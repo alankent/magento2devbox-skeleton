@@ -32,7 +32,6 @@ REM Magento files not worth pulling locally.
 @SET IGNORE=%IGNORE% -ignore "Path magento2/var/.update_cronjob_status"
 @SET IGNORE=%IGNORE% -ignore "Path magento2/pub/media"
 @SET IGNORE=%IGNORE% -ignore "Path magento2/pub/static"
-@SET IGNORE=%IGNORE% -ignore "Path magento2/app/etc/env.php"
 
 REM Other files not worth pushing to the container.
 @SET IGNORE=%IGNORE% -ignore "Path magento2/.git"

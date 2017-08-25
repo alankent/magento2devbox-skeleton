@@ -35,65 +35,55 @@ services:
           #- "./shared/.magento-cloud:/home/magento2/.magento-cloud"
 
         environment:
-          # TODO: Prune back these variables.
-          - SHARED_CODE_PATH="/home/magento2/magento2"
-          - USE_RABBITMQ=0
-          - USE_REDIS_FULL_PAGE_CACHE=0
-          - USE_REDIS_CACHE=0
-          - USE_REDIS_SESSIONS=0
-          - USE_VARNISH=0
-          - USE_ELASTICSEARCH=0
-          - MAGENTO_PUBLIC_KEY=57db5595af2135685cc2c96af1be707b
-          - MAGENTO_PRIVATE_KEY=9d74dca55383dcaf6b03d91cea09ecad
-          - MAGENTO_USE_SOURCES_IN_HOST=0
-          - CREATE_SYMLINK_EE=0
-          - HOST_CE_PATH=./shared/webroot
-          - EE_DIRNAME=magento2ee
-          - MAGENTO_DOWNLOAD_SOURCES_COMPOSER=1
-          - MAGENTO_EDITION=ce
-          - MAGENTO_VERSION=2.2.0-rc21
-          - MAGENTO_SAMPLE_DATA_INSTALL=1
-          - MAGENTO_DOWNLOAD_SOURCES_CLOUD=0
-          - MCLOUD_USERNAME=
-          - MCLOUD_PASSWORD=
-          - MCLOUD_GENERATE_NEW_TOKEN=
-          - MCLOUD_PROJECT=
-          - MCLOUD_BRANCH=
-          - MAGENTO_CRON_RUN=0
-          - MAGENTO_DI_COMPILE=0
-          - MAGENTO_GRUNT_COMPILE=0
-          - MAGENTO_STATIC_CONTENTS_DEPLOY=0
-          - MAGENTO_BACKEND_PATH=admin
-          - MAGENTO_ADMIN_USER=admin
-          - MAGENTO_ADMIN_PASSWORD=admin123
+          # Optional. If set, container will create a default auth.json
+          # file for Composer to use (if one does not already exist).
+          #- MAGENTO_PUBLIC_KEY=<insert-hex-key-here>
+          #- MAGENTO_PRIVATE_KEY=<insert-hex-key-here>
+
+        # The following exposes ports inside the container publicly.
+        # Docker maps the public port numbers to ports inside the container
+        # using Linux iptables support. If a single number is specified,
+        # Docker will pick an unused port number at random every time the
+        # container restarts. Use 8080:80 to bind the public port number
+        # of 8080 to the internal port number of 80. (The internal port
+        # number never changes - you may pick any external port number
+        # to avoid collisions between different containers or projects.)
         ports:
 
-          # Pick a random unused web server port. (Use 8080:80 for a fixed
-          # port number.)
+          # Pick a random unused web server port.
+          # (Use 8080:80 for force external port to be 8080.)
           - 80
 
-          # Pick a random SSH port. (Use 22:22 to force it to be 22 locally.)
+          # The SSH port.
           - 22
 
-          # Pick a random unused Unison port.
-          # (Can be commented out if not using Unison.)
+          # Pick a random unused unison port.
+          # (Only needed if using Unison for file syncing.)
           - 5000
+
+          # Default BrowserSync ports.
+          # (Only needed if using BrowserSync for frontend development.)
+          - 3000
+          - 3001
 
     db:
         container_name: proj1-m2db
         restart: always
         image: mysql:5.6
+
         ports:
           - "3306"
+
         environment:
           - MYSQL_ROOT_PASSWORD=root
           - MYSQL_DATABASE=magento2
-        volumes:
 
-          # Uncomment if you want the database to live after removing the
-          # containers. (Not recommended, can be confusing.)
-          #- "./shared/db:/var/lib/mysql"
+        volumes:
 
           # Uncomment to mount log files locally.
           #- "./shared/logs/mysql:/var/log/mysql"
+
+          # Uncomment if you want the database to last after removing the
+          # container. (Not recommended.)
+          #- "./shared/db:/var/lib/mysql"
 

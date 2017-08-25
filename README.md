@@ -115,6 +115,21 @@ adjustments as described by comments in the file. This includes:
 
 ### 3. Launch the Containers
 
+TODO: SOME FOLLOWING STEPS REQUIRE docker-compose.yml FILE CHANGES AND CHANGES
+INSIDE THE CONTAINERS AFTER BEING BUILT. THAT WOULD REQUIRE SPLITTING
+DESCRIPTIONS OF VARNISH ETC INTO TWO SECTIONS - STEPS TO DO BEFORE STARTING THE
+CONTAINERS AND STEPS TO DO AFTERWARDS.
+
+TODO: SHOULD WE ADD A STEP DESCRIBING HOW TO SET UP A GIT REPO TO SHARE THE
+docker-compose.yml SETTINGS BETWEEN USERS?
+
+It is recommended to read through all the following steps before launching the
+containers as described below. Some of the optional steps below require
+changes to the `docker-compose.yml` file, which requires rebuilding the
+containers to take effect. For example, Gulp and BrowserSync support requires
+opening up another port on the web service container. It is simpler to make
+these changes before starting up the containers.
+
 Launch the containers by changing to the project directory and then running:
 
     docker-compose up -d
@@ -192,6 +207,8 @@ TODO
 
 **Internal Development**
 
+TODO: THIS SECTION IS INDICATIVE OF FUTURE DIRECTION, NOT SUPPORTED YET.
+
 This section is ONLY relevant to internal Magento developers, or external
 developers wishing to submit a pull request. The following is NOT recommended
 for production sites. (It may however be worth exploring by extension
@@ -246,7 +263,8 @@ The `mysql` command can now be used without arguments or selecting database.
     > exit;
 
 Set up all the Magento 2 tables with the following command (adjusting command
-line paramter values as desired).
+line parameter values as desired). (See below for extra arguments if you wish
+to use RabbitMQ as well.)
 
     magento setup:install --db-host=db --db-name=magento2 --db-user=root --db-password=root --admin-firstname=Magento --admin-lastname=Administrator --admin-email=user@example.com --admin-user=admin --admin-password=admin123 --language=en_US --currency=USD --timezone=America/Chicago --use-rewrites=1 --backend-frontname=admin
 
@@ -321,16 +339,6 @@ It is recommended to run the sync shell script in a separat Terminal window.
 
     ./m2devbox-unison-sync.sh
 
-### 8. Connect with a Web Browser
-
-Run the following command to determine the web server port number.
-
-    docker-compose port web 80
-
-Be aware that in developer mode the slower PHP debug mode is on and missing
-CSS and similar files are created on demand. This means the first time you
-load a page you will see significantly longer load times.
-
 ### 9. Cron
 
 Cron is disabled by default. Running cron may result in faster draining of
@@ -341,26 +349,78 @@ second cron to run)
     magento cron:run
     magento cron:run
 
-To enable cron permanently run the following command.
+To enable cron permanently run the following shell script.
 
-    cat <<EOF | crontab -
-    * * * * * /usr/local/bin/php /var/www/magento2/bin/magento cron:run | grep -v "Ran jobs by schedule" >> /var/www/magento2/var/log/magento.cron.log
-    * * * * * /usr/local/bin/php /var/www/magento2/update/cron.php >> /var/www/magento2/var/log/update.cron.log
-    * * * * * /usr/local/bin/php /var/www/magento2/bin/magento setup:cron:run >> /var/www/magento2/var/log/setup.cron.log
-    EOF
+    cron-install
+
+### 8. Connect with a Web Browser
+
+Run the following command to determine the web server port number to use when
+connecting to the web service container. (This can be different to the port
+number used inside the container.)
+
+    docker-compose port web 80
+
+If the response is, for example, port 8080, connect to the web server store
+front using
+
+    http://localhost:8080/
+
+Connect to the Magento Admin by appending `/admin` with username "admin" and
+password "admin123" (from the earlier `magento setup:install` command)
+
+    http://localhost:8080/admin
+
+If you are running Docker inside VirtualBox, replace "localhost" with the IP
+address VirtalBox allocated to the VM Docker is running within.
+
+Be aware that in developer mode the slower PHP debug mode is on and missing
+CSS and similar files are created on demand. This means the first time you
+load a page you will see significantly longer load times.
 
 ### 10. Configure PHP Storm (if appropriate)
-
 TODO: Script? SSH and Remote Interpreters?
 
 ### 11. Varnish Configuration
 TODO
+
 ### 12. Redis Configuration
 TODO
-### 13. Grunt Configuration
-TODO
-### 14. Gulp Configuration
-TODO
+
+### 13. Grunt and Gulp Configuration
+
+Grunt and Gulp are both frontend tool chains to speed up frontend development.
+They can both auto-recompile CSS files as soon as a file is written to disk.
+NodeJS is preinstalled in the web service container for use by Grunt and Gulp.
+
+To enable Grunt support, run the following commands
+
+    cd /var/www/magento2
+    cp Gruntfile.js.sample Gruntfile.js
+    cp package.json.sample package.json
+    npm install
+    grunt refresh --force
+
+For further details, please refer to the Grunt section in the "Frontend
+Developer Guide" on http://devdocs.magento/com.
+
+Magento does not ship with default Gulp support, but there is the excellent
+"frontools" community project based on Gulp. Frontools can be found at
+https://github.com/SnowdogApps/magento2-frontools. Version 0.11.4 was the last
+version with Less support (as supported by Magento). Frontools provides Sass
+replacements for the blank theme that they now support.
+
+If frontools is not suitable, there are numerous other articles on the web
+explaining how to set up Gulp support such as
+https://alankent.me/2016/01/27/gulp-et-al-in-magento-2/. Magento provides a
+`magento dev:source-theme:deploy` command that resolves all of the Magento file
+fallback rules, allowing Gulp or other similar pipelines to be run on the
+resultant directory tree.
+
+If you wish to run BrowserSync with Gulp (https://www.browsersync.io/), you
+will also need to edit the `docker-compose.yml` file to add the BrowserSync
+port number to the "ports" list to expose. For this to take effect, you must
+rebuild the container which will wipe all the files in the container.
 
 # Tips and Tricks
 
@@ -385,23 +445,45 @@ Restart the containers later with
 If you are using Unison, remember to also restart Unison for file syncing
 to work.
 
-When you no longer need the container, you can kill and remove it. THIS WILL
-WIPE ALL FILES INSIDE THE CONTAINER, LOSING ANY CHANGES FOREVER. It will not
-remove the locally synchronized files under the `shared` directory.
+## Removing and Rebuilding Containers
+
+When you no longer need the DevBox, you can kill and remove all of the running
+containers. THIS WILL WIPE ALL FILES INSIDE THE WEB CONTAINER AND THE DATABASE,
+LOSING ANY CHANGES FOREVER. It will not remove any locally synchronized files
+under the `shared` directory.
 
     docker-compose kill
     docker-compose rm
 
 If you decide to change the settings in `docker-composer.yml` after the
-containers have been created, you will need to remove the current containers
-and recreate them (including the database contents). MAKE SURE THE SOURCE CODE
-IS UP TO DATE UNDER THE `shared/www` DIRECTORY BEFORE DELETING THE CONTAINERS
-TO MAKE SURE YOU DO NOT ACCIDENTALLY LOSE ANY OF YOUR WORK.
+containers have been created, you will need to rebuild the containers.
+MAKE SURE THE SOURCE CODE IS UP TO DATE UNDER THE `shared/www` DIRECTORY ON
+YOUR LAPTOP BEFORE REBUILDING THE CONTAINERS TO MAKE SURE YOU DO NOT
+ACCIDENTALLY LOSE ANY OF YOUR WORK.
+
+There are two strategies you can use. The first is to delete all the containers
+as above and then recreate them. This will delete the database contents as
+well.
 
     docker-compose kill
     docker-compose rm
     # Make changes to docker-compose.yml
     docker-compose up -d
+
+If you are using Unison file syncing, when you restart Unison locally it will
+copy all the code from `shared/www` back into the `/var/www` directory inside
+the container. After that, `magento setup:install` can be run to rebuild the
+database.
+
+The second approach is to use the `--build` option of Docker Compose which
+will only rebuild affected containers. For example, if opening up a new port
+to the web service container, using `--build` will not remove the database
+container, preserving its contents. When the `/var/www` directory is restored
+(via Unison or Volume mounting) the database connection settings (in `env.php`)
+will also be restored.
+
+    # Make changes to docker-compose.yml
+    docker-compose up -d --build
 
 ## Kitematic
 
