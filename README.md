@@ -49,7 +49,7 @@ Mac and Windows cannot directly access the file system inside the web container
 
 Where volume mounts are not suitable (specifically, the Magento source code
 directory on Mac and Windows), DevBox syncs the local and container file
-systems using a program called Unison. Whenver a file in the watched local file
+systems using a program called Unison. Whenever a file in the watched local file
 system is changed, it is copied into the web container, and vice versa. This
 allows IDEs to be natively used on a laptop (or desktop) - Unison copies file
 changes as soon as they are written to disk into the web conatiner.
@@ -74,7 +74,7 @@ ready to get up and going with DevBox.
 
 ### 1. Create a Local Project Directory
 
-Create a new directory per project. Use a meaningful directory names as it is
+Create a new directory per project. Use a meaningful directory name as it is
 also used as a prefix for DevBox containers. Download a copy of the files in
 this GitHub repository to the project directory.
 
@@ -105,29 +105,23 @@ adjustments as described by comments in the file. This includes:
   (and extensions purchased from Magento Marketplace) can be downloaded.
   Composer caches downloads for performance. Mounting the cache directory on
   your laptop is enabled by uncommenting the "~/.composer" volume mount in the
-  `docker-compose.yml` file. This allows downloads to be shared betwen
+  `docker-compose.yml` file. This allows downloads to be shared between
   containers (e.g. on different projects). If you do not mount a directory, the
   cache will discarded when the container is removed.
 
 * Add your keys as web service environment variables if you want to share these
-  keys easily with other developers on the same project.
+  keys easily with other developers on the same project. (You can share the
+  `docker-compose.yml` to ensure a consistent setup between team members.)
 
 * If you plan to use Varnish caching, uncomment the appropriate lines to create
-  the Varnish container. A common source of production web caching issues is
-  due to not testing with Varnish during development.
+  the Varnish container. A common source of production web caching defects is
+  the lack of testing with Varnish during development.
 
 * Similarly, if you plan to use Redis, ElasticSearch, or RabbitMQ in
   production, uncomment the appropriate lines so you can test during
   developement.
 
 ### 3. Launch the Containers
-
-It is recommended to read through all the following steps before launching the
-containers as described below. Some of the optional steps below require
-changes to the `docker-compose.yml` file, which requires rebuilding the
-containers to take effect. For example, Gulp and BrowserSync support requires
-opening up another port on the web service container. It is simpler to make
-these changes before starting up the containers.
 
 Launch the containers by changing to the project directory and then running:
 
@@ -141,9 +135,9 @@ To get a bash prompt inside the web container, use
 
     docker-compose exec web bash
 
-You should see a shell prompt of `m2$`. If you are using the Git Bash window,
-you may see an error message saying you need to use `winpty`. In that case
-you must use the following command to create a bash prompt.
+You should see a shell prompt of `m2$`. If you are using a Git Bash window on
+Windows, you may see an error message saying you need to use `winpty`. In that
+case you must use the following command to create a bash prompt.
 
     winpty docker-compose exec web bash
 
@@ -151,23 +145,23 @@ you must use the following command to create a bash prompt.
 
 Next you need to install your Magento project inside the web container under
 the `/var/www/magento2` directory. (Apache is configured by default to use
-`magento2` as the document root.) There are multiple options here.
+`/var/www/magento2` as the document root.) There are multiple options here.
 
 Note: The first time you run Composer in the following steps, it may prompt you
 for a username and password. Enter your 'public' and 'private' keys from
 http://marketplace.magento.com/, "My Profile", "Access keys" when prompoted. Be
 aware that an `auth.json` file holding your keys will be saved into
-`~/.composer/`. You may want to share the Composer downloaded files but have a
-different `auth.json` file per project by moving the `auth.json` file into your
-project's home directory (but not committing this file to git for security
-reasons).
+`~/.composer/`. If you want to share the Composer downloaded files but have a
+different `auth.json` file per project, move the `auth.json` file into your
+project's home directory. Most people add this file to their `.gitignore` file
+to help restrict access to the download keys.
 
 **Existing Project**
 
 If you have an existing project with all the source code already under
-`shared/www`, no additional configuration is needed. If you use volume
-mounting, the code will automatically be visible; if you use Unison, it will
-copy files on your laptop into the web container when Unison is started.
+`shared/www` on your laptop, no additional configuration is needed. If you use
+volume mounting, the code will automatically be visible; if you use Unison, it
+will copy files on your laptop into the web container when Unison is started.
 
 **Creating a New Project with Composer**
 
@@ -175,8 +169,11 @@ Log into the web container.
 
     docker-compose exec web bash
 
-Create a new project under `/var/www/magento2`. (Update the project version
-number as appropriate.)
+Create a new project under `/var/www/magento2`. Update the project edition and
+version number as appropriate. This example uses Magento Open Source (formerly
+"Community Edition") version 2.1.8. (`xdebug-off` is a convenient shell script
+in the `~/bin` directory to turn of XDebug support. XDebug significantly slows
+down Composer.)
 
     cd /var/www/magento2
     xdebug-off
@@ -195,6 +192,7 @@ Log into the web container:
 Check out the project from inside the container into the `magento2` directory.
 
     cd /var/www
+    rm -rf magento2
     git clone https://github.com/mycompany/myproject.git magento2
     cd magento2
     xdebug-off
@@ -235,7 +233,7 @@ or the B2B code base, if you have appropriate permissions.
     xdebug-off
     composer require ...TODO...
 
-### 6. Create the Database
+### 5. Create the Database
 
 The MySQL container by default does not have a database created for Magento
 to use. The following creates the database `magento2`.
@@ -296,7 +294,7 @@ To load the sample data into the database, run
 
     magento setup:upgrade
 
-### 7. Put Site into Developer Mode
+### 6. Put Site into Developer Mode
 
 Put the site into developer mode. Turning on xdebug is useful for debuging
 purposes, but makes all PHP scripts slower to execute.
@@ -311,14 +309,14 @@ process (and keep it running). It is generally recommended to start this up
 after you have installed Magento above.
 
 On Windows, run the supplied BAT file to launch Unison in a separate window
-using the START command or by double clicking the BAT file via Windows
+using the START command or by double clicking the BAT file via Windows file
 explorer. This will automatically retrieve a copy of the `unison.exe` binary
 from the web container. Close the window to kill Unison.
 
     START m2devbox-unison-sync.bat
 
 Mac binaries and a shell script are also provided. It is recommended to run the
-sync shell script in a separate Terminal window so you can look at its output
+sync shell script in a separate Terminal window so you can refer to its output
 if you ever need to do troubleshooting.
 
     ./m2devbox-unison-sync.sh
@@ -330,7 +328,7 @@ Each time you log in, make sure you restart Unison, but be careful to not have
 multiple copies running in parallel. It is not recommended to do significant
 work on the project without Unison running to avoid merge conflicts (rare).
 
-### 9. Cron
+### 8. Cron
 
 Cron is disabled by default. Running cron may result in faster draining of
 laptop batteries. To manually trigger background index updates, run `magento
@@ -344,7 +342,7 @@ To enable cron permanently run the following shell script.
 
     cron-install
 
-### 8. Connect with a Web Browser
+### 9. Connect with a Web Browser
 
 Run the following command to determine the web server port number to use when
 connecting to the web service container. (This can be different to the port
@@ -370,13 +368,35 @@ CSS and similar files are created on demand. This means the first time you
 load a page you will see significantly longer load times.
 
 ### 10. Configure PHP Storm (if appropriate)
+
 TODO: Script? SSH and Remote Interpreters?
 
 ### 11. Varnish Configuration
-TODO
+
+Varnish is a "HTTP accelerator" that sits in front the web server and caches
+content of HTTP responses. It is recommended to use Varnish during development
+to help identify caching issues as early as possible.
+
+To enable Varnish, run the following command. This updates configuration
+settings in the database.
+
+TODO: IS THIS STILL THE RIGHT WAY? OR SHOULD FOR 2.2 ONWARDS IT BE USING 
+CONFIG SET CLI COMMANDS WITH APP:CONFIG:DUMP ETC. TO MOVE SETTINGS FROM
+ENV.PHP TO CONFIG.PHP ETC?
+
+    varnish-install
+
+To connect via your web browser to Varnish, you must use the Varnish port
+number instead of the web server port number. To determine the Varnish port
+number, use
+
+TODO: WHY 6081? WHY NOT PORT 80?
+
+    docker-compose port varnish 6081
 
 ### 12. Redis Configuration
-TODO
+
+TODO: SHOULD REDIS BE CONFIGURED USING CLI COMMANDS NOW? ENV.PHP ETC?
 
 ### 13. Grunt and Gulp Configuration
 
@@ -395,7 +415,7 @@ To enable Grunt support, run the following commands
     grunt watch
 
 For further details, please refer to the Grunt section in the "Frontend
-Developer Guide" on http://devdocs.magento/com.
+Developer Guide" on http://devdocs.magento.com/.
 
 Magento does not ship with Gulp support, but there are numerous articles on the
 web explaining how to use Gulp with Magento 2, such as
@@ -511,7 +531,3 @@ To rebuild indexes
 
     magento indexer:reindex
 
-# Contributions
-
-Please use GitHub (TODO: INSERT URL) for issue tracking or to make
-contributions.
