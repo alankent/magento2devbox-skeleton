@@ -8,7 +8,9 @@ services:
     web:
         restart: always
         image: alankent/magento2devbox-web:latest
-        volumes:
+
+        # Uncomment this line if you uncomment any of the following volumes.
+        #volumes:
 
           # LEAVE THIS LINE COMMENTED OUT IF YOU ARE USING UNISON.
           # Uncomment to use Docker volume mounts to share files with
@@ -55,20 +57,20 @@ services:
         ports:
 
           # Pick a random unused web server port.
-          # (Use 8080:80 for force external port to be 8080.)
-          - 80
+          # (Use "8080:80" for force external port to be 8080.)
+          - "80"
 
-          # The SSH port.
-          - 22
+          # Pick a random SSH port.
+          - "22"
 
           # Pick a random unused unison port.
           # (Only needed if using Unison for file syncing.)
-          - 5000
+          - "5000"
 
-          # Default BrowserSync ports.
+          # Expose the BrowserSync ports.
           # (Only needed if using BrowserSync for frontend development.)
-          - 3000
-          - 3001
+          - "3000"
+          - "3001"
 
     db:
         restart: always
@@ -81,7 +83,8 @@ services:
           - MYSQL_ROOT_PASSWORD=root
           - MYSQL_DATABASE=magento2
 
-        volumes:
+        # Uncomment the following line if you uncomment a volume mount
+        #volumes:
 
           # Uncomment to mount log files locally.
           #- "./shared/logs/mysql:/var/log/mysql"

@@ -1,0 +1,18 @@
+#!/bin/bash
+
+if [[ ! -f docker-compose.yml ]]; then
+    echo "Warning: No `docker-compose.yml` file found."
+    echo "Are you running this script from the correct directory?"
+    exit 1
+fi
+
+SSH_HOST=$(docker-compose port web 22 | awk -F: '{
+    host = $1
+    if (host == "") host = "localhost"
+    if (host == "0.0.0.0") host = "localhost"
+    print host
+}')
+
+SSH_PORT=$(docker-compose port web 22 | awk -F: '{print $2}')
+
+exec ssh -p ${SSH_PORT} magento2@${SSH_HOST} $*

@@ -63,12 +63,13 @@ ready to get up and going with DevBox.
 
 * Install a recent version of Docker from http://docker.com/. Docker is
   available for Windows, Mac, and Linux. 
-* As part of the Docker installation process, on Windows 10 you may need to
+* As part of the Docker installation process on Windows 10, you may need to
   turn on Hyper-V and then grant Docker access to the `C:` drive for Docker to
   mount volumes correctly. This is described in the Docker documentation.
 * On Windows, it can be useful to install "Git Bash"
-  (https://git-for-windows.github.io/). As well as Git, it includes a terminal
-  emulator as well as a useful collection of Linux commands.
+  (https://git-for-windows.github.io/). As well as Git, it includes SSH, an
+  xterm terminal emulator, and a useful collection of commonly used Linux
+  commands.
 
 ## Setting Up a New Environment
 
@@ -133,13 +134,26 @@ You can check what containers exist using
 
 To get a bash prompt inside the web container, use
 
-    docker-compose exec web bash
+    docker-compose exec --user magento2 web bash
 
 You should see a shell prompt of `m2$`. If you are using a Git Bash window on
 Windows, you may see an error message saying you need to use `winpty`. In that
 case you must use the following command to create a bash prompt.
 
-    winpty docker-compose exec web bash
+    winpty docker-compose exec --user magento2 web bash
+
+In general this works well, but on Windows the 'exec' command will exit if you
+press CTRL+Z. If you like using CTRL+Z in Linux, this is rather annoying, so
+SSH access is recommended instead.
+
+To enable SSH support (recommended), make sure port 22 is uncommented in
+`docker-compose.yml` and mapped to an available port number. For example, use
+"2222:22" to use port 2222 to avoid colliding with any local SSH daemons.
+You must then use the `-p 2222` argument to specify the port number. The
+`m2ssh` command (BAT and bash versions available) automatically picks up the
+port number from your `docker-compose.yml` file.
+
+    m2ssh
 
 ### 4. Install Magento
 
@@ -167,7 +181,7 @@ will copy files on your laptop into the web container when Unison is started.
 
 Log into the web container.
 
-    docker-compose exec web bash
+    m2ssh
 
 Create a new project under `/var/www/magento2`. Update the project edition and
 version number as appropriate. This example uses Magento Open Source (formerly
@@ -187,7 +201,7 @@ repository on a hosting provider such as GitHub or BitBucket.
 
 Log into the web container:
 
-    docker-compose exec web bash
+    m2ssh
 
 Check out the project from inside the container into the `magento2` directory.
 
@@ -213,7 +227,7 @@ developers.)
 
 Log into the web container:
 
-    docker-compose exec web bash
+    m2ssh
 
 Make a local clone of Magento Open Source (formerly Community Edition). Use
 your own fork repository URL if appropriate.
@@ -240,7 +254,7 @@ to use. The following creates the database `magento2`.
 
 Log on to the bash prompt inside the web container
 
-    docker-compose exec web bash
+    m2ssh
 
 Run the following commands to create a MyQL database for the web site to use
 (plus a second database for integration tests to use).
@@ -313,13 +327,13 @@ using the START command or by double clicking the BAT file via Windows file
 explorer. This will automatically retrieve a copy of the `unison.exe` binary
 from the web container. Close the window to kill Unison.
 
-    START m2devbox-unison-sync.bat
+    START m2unison.bat
 
 Mac binaries and a shell script are also provided. It is recommended to run the
 sync shell script in a separate Terminal window so you can refer to its output
 if you ever need to do troubleshooting.
 
-    ./m2devbox-unison-sync.sh
+    ./m2unison
 
 This shell script cannot be used on Linux, only Mac OSX. Use volume mounting on
 Linux (not Unison).
