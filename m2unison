@@ -37,7 +37,7 @@ IGNORE="$IGNORE -ignore 'Path magento2/.git'"
 IGNORE="$IGNORE -ignore 'Path magento2/.gitignore'"
 IGNORE="$IGNORE -ignore 'Path magento2/.gitattributes'"
 IGNORE="$IGNORE -ignore 'Path magento2/.magento'"
-IGNORE="$IGNORE -ignore 'Path magento2/.idea'"
+IGNORE="$IGNORE -ignore 'Name {.idea}'"
 IGNORE="$IGNORE -ignore 'Name {.*.swp}'"
 IGNORE="$IGNORE -ignore 'Name {.unison.*}'"
 

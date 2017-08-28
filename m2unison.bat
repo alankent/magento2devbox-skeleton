@@ -42,7 +42,7 @@ REM Other files not worth pushing to the container.
 @SET IGNORE=%IGNORE% -ignore "Path magento2/.gitignore"
 @SET IGNORE=%IGNORE% -ignore "Path magento2/.gitattributes"
 @SET IGNORE=%IGNORE% -ignore "Path magento2/.magento"
-@SET IGNORE=%IGNORE% -ignore "Path magento2/.idea"
+@SET IGNORE=%IGNORE% -ignore "Name {.idea}"
 @SET IGNORE=%IGNORE% -ignore "Name {.*.swp}"
 @SET IGNORE=%IGNORE% -ignore "Name {.unison.*}"
 

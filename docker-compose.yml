@@ -60,8 +60,12 @@ services:
           # (Use "8080:80" for force external port to be 8080.)
           - "80"
 
-          # Pick a random SSH port.
-          - "22"
+          # Use port 2222 for SSH (make sure unique across projects).
+          # (If using the PHP Storm IDE, It is strongly recommended to pick a
+          # dedicated port using the "2222:22" syntax so the port number does
+          # not change each time the container is restarted, requiring PHP
+          # Storm reconfiguration.)
+          - "2222:22"
 
           # Pick a random unused unison port.
           # (Only needed if using Unison for file syncing.)
