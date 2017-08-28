@@ -132,28 +132,30 @@ You can check what containers exist using
 
     docker ps -a
 
-To get a bash prompt inside the web container, use
+To get a bash prompt inside the a container, use
 
     docker-compose exec --user magento2 web bash
 
-You should see a shell prompt of `m2$`. If you are using a Git Bash window on
-Windows, you may see an error message saying you need to use `winpty`. In that
-case you must use the following command to create a bash prompt.
+This example specified the 'web' service container (see `docker-compose.yml`
+for the other service names). You should see a shell prompt of `m2$`. If you
+are using a Git Bash window on Windows, you may see an error message saying you
+need to use `winpty`. In that case you must use the following command.
 
     winpty docker-compose exec --user magento2 web bash
 
 In general this works well, but on Windows the 'exec' command will exit if you
 press CTRL+Z. If you like using CTRL+Z in Linux, this is rather annoying, so
-SSH access is recommended instead.
+SSH access is recommended instead. SSH is currently only supported in the 'web'
+service container.
 
-To enable SSH support (recommended), make sure port 22 is uncommented in
-`docker-compose.yml` and mapped to an available port number. For example, use
-"2222:22" to use port 2222 to avoid colliding with any local SSH daemons.
-You must then use the `-p 2222` argument to specify the port number. The
-`m2ssh` command (BAT and bash versions available) automatically picks up the
-port number from your `docker-compose.yml` file.
+The `m2ssh` BAT and bash scripts automatically pick up the port number from the
+`docker-compose.yml` file and logs on to the 'magento2' account.
 
     m2ssh
+
+If you are running Docker in VirtualBox, you may need to edit the local `m2ssh`
+and `m2unison` scripts to replace "localhost" with the IP address allocated by
+VirtualBox.
 
 ### 4. Install Magento
 
@@ -174,8 +176,9 @@ to help restrict access to the download keys.
 
 If you have an existing project with all the source code already under
 `shared/www` on your laptop, no additional configuration is needed. If you use
-volume mounting, the code will automatically be visible; if you use Unison, it
-will copy files on your laptop into the web container when Unison is started.
+volume mounting, the code will automatically be visible; if you use Unison,
+Unison will copy files on your laptop into the web container when it is
+started.
 
 **Creating a New Project with Composer**
 
@@ -347,10 +350,12 @@ work on the project without Unison running to avoid merge conflicts (rare).
 Cron is disabled by default. Running cron may result in faster draining of
 laptop batteries. To manually trigger background index updates, run `magento
 cron:run` twice in a row (sometimes the first cron schedules jobs for the
-second cron to run)
+second cron to run).
 
     magento cron:run
     magento cron:run
+
+TODO: VERIFY TWO RUNS ARE NEEDED FIRST TIME ONLY. IF SO, CAN SIMPLIFY HERE.
 
 To enable cron permanently run the following shell script.
 
@@ -387,6 +392,8 @@ TODO: Script? SSH and Remote Interpreters?
 
 ### 11. Varnish Configuration
 
+TODO: THIS SECTION IS NOT COMPLETE.
+
 Varnish is a "HTTP accelerator" that sits in front the web server and caches
 content of HTTP responses. It is recommended to use Varnish during development
 to help identify caching issues as early as possible.
@@ -394,23 +401,42 @@ to help identify caching issues as early as possible.
 To enable Varnish, run the following command. This updates configuration
 settings in the database.
 
-TODO: IS THIS STILL THE RIGHT WAY? OR SHOULD FOR 2.2 ONWARDS IT BE USING 
-CONFIG SET CLI COMMANDS WITH APP:CONFIG:DUMP ETC. TO MOVE SETTINGS FROM
-ENV.PHP TO CONFIG.PHP ETC?
+TODO: NEED TO TRY THIS OUT AND TEST WITH VARNISH CONTAINER ETC.
 
     varnish-install
+    # magento config:set --scope=default --scope-code=0 system/full_page_cache/caching_application 2
 
 To connect via your web browser to Varnish, you must use the Varnish port
 number instead of the web server port number. To determine the Varnish port
 number, use
 
-TODO: WHY 6081? WHY NOT PORT 80?
+TODO: WHY 6081? WHY NOT PORT 80? DEVDOCS MENTIONED PORT 6082 AS WELL.
 
     docker-compose port varnish 6081
 
 ### 12. Redis Configuration
 
-TODO: SHOULD REDIS BE CONFIGURED USING CLI COMMANDS NOW? ENV.PHP ETC?
+Uncomment the Redis service in the `docker-compose.yml` if you wish to use
+Redis during development, keeping your local development environment closer to
+your production setup. Redis is recommended if you have a cluster of web
+servers in production as an efficient way to share state (such as current
+session information) between them.
+
+The Magento DevDocs site (http://devdocs.magento.com/) describes how to
+configuration Redis. The following instructions summarize the steps for
+Magento 2.2 onwards.
+
+To turn on usage of Redis for session caching, run
+
+    magento setup:config:set --session-save=redis --session-save-redis-host=redis --session-save-redis-log-level=3 --session-save-redis-timeout=10
+
+To turn on usage of Redis for default data caching, run
+
+    magento setup:config:set --cache-backend=redis --cache-backend-redis-server=redis --cache-backend-redis-db=1
+
+To turn on usage of Redis for page caching (not needed if using Varnish), run
+
+    magento setup:config:set --page-cache=redis --page-cache-redis-server=redis --page-cache-redis-db=2
 
 ### 13. Grunt and Gulp Configuration
 
