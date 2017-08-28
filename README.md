@@ -439,6 +439,64 @@ If you wish to run BrowserSync (https://www.browsersync.io/), with Gulp you
 need to ensure the BrowserSync ports (3000 and 3001) are left uncommented in
 the `docker-compose.yml` file.
 
+# Developing Your Own Module or Extension
+
+This section contains suggested ways in which you can manage modules or
+extensions that are being developed in a separate git repository to your main
+project. For example, a system integrator may wish to share a set of locally
+developed modules across multiple customers.
+
+## Single Module Projects
+
+Composer has special support when there is one module per git repository.
+Composer can perform a git clone of the code automatically, where the code ends
+up under the `vendor` directory, like other downloaded modules, but you can
+edit and change the source code and commit your changes afterwards.
+
+In this mode, you create your module in git first, then run the following
+commands to update the composer.json file.
+
+First add a repository entry for the git repository, replacing "myvendor" and
+"mymodule" with your vendor and module name.
+
+    composer config repositories.mymodule vcs git@github.com:myvendor/module-mymodule.git
+
+Next, add the dependency on your module. A version number with the form of
+"dev-{branch}" checks out that branch from the git repository.
+
+    composer require --prefer-source myvendor/module-mymodule:dev-master
+
+Refer to the Composer documentation for more details and variations supported.
+
+## Multi-Module Projects
+
+If you want to keep multiple modules in one git repo (so they version
+together), a different approach is required. Note this can also be used for git
+repositories containing a single module if desired.
+
+First, check out your git repository under `/var/www` (alongside the `magento2`
+directory).
+
+    cd /var/www
+    git clone git@github.com:myvendor/myrepo.git
+
+Next, add a repository reference to all the directories containing packages
+(that is, all directories containing a `composer.json` file). You may use `*`
+in path wildcards to include multiple directories at a time. Make sure you use
+quotes to make sure the shell does not expand the wildcards.
+
+    composer config repositories.myrepo path "../myrepo/app/*/myvendor/*"
+
+You can then add dependencies to any of the packages in the specified
+directories. Composer will create a symlink from under the `vendor/myvendor`
+directory to the appropriate git repository directory.
+
+    composer require myvendor/module-mymodule:*
+
+Note that while Unison will not sync the symlink, if you specify the
+`shared/www` local directory as the "source code root" in PHP Storm, it will
+find the PHP code under both `/var/www/magento2` and `/var/www/myrepo`.
+
 # Tips and Tricks
 
 The following can be useful tips and tricks.
