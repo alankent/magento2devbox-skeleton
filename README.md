@@ -172,7 +172,7 @@ different `auth.json` file per project, move the `auth.json` file into your
 project's home directory. Most people add this file to their `.gitignore` file
 to help restrict access to the download keys.
 
-**Existing Project**
+**Option 1: Existing Project**
 
 If you have an existing project with all the source code already under
 `shared/www` on your laptop, no additional configuration is needed. If you use
@@ -180,7 +180,7 @@ volume mounting, the code will automatically be visible; if you use Unison,
 Unison will copy files on your laptop into the web container when it is
 started.
 
-**Creating a New Project with Composer**
+**Option 2: Creating a New Project with Composer**
 
 Log into the web container.
 
@@ -197,7 +197,7 @@ down Composer.)
     composer create-project --repository=https://repo.magento.com/ magento/project-community-edition:2.1.8 .
     chmod +x bin/magento
 
-**Getting Code from a GitHub Project**
+**Option 3: Getting Code from a GitHub Project**
 
 It is strongly recommended to saving your project code in a private git
 repository on a hosting provider such as GitHub or BitBucket. The following
@@ -216,7 +216,7 @@ Check out the project from inside the container into the `magento2` directory.
     xdebug-off
     composer install
 
-**Magento Commerce (Cloud)**
+**Option 4: Magento Commerce (Cloud)**
 
 TODO: WARNING: THIS SECTION IS NOT COMPLETE.
 
@@ -253,7 +253,7 @@ above. `magento-cloud build` runs the `composer install` and patching command,
 but also runs additional commands (such as `di-compile`) which you may not want
 to run during development.
 
-**Internal Development**
+**Option 5: Internal Development**
 
 TODO: THIS SECTION IS INDICATIVE OF FUTURE DIRECTION, NOT SUPPORTED YET.
 
@@ -328,7 +328,7 @@ be added when the project was created above.
 
     --amqp-virtualhost=/ --ampq-host=ampq --amqp-port=TODO --amqp-user=guest --amqp-password=guest
 
-**Loading Optional Sample Data**
+**Loading Sample Data (Optional)**
 
 To download the Luma sample data, you may need to provide Composer
 authentication details. If you already have a `~/.composer/auth.json` file you
@@ -353,7 +353,7 @@ purposes, but makes all PHP scripts slower to execute.
     magento deploy:mode:set developer
     xdebug-on
 
-### 7. Start Unison, if Needed
+### 7. Start Unison (Mac, Windows)
 
 If you are using Unison for file syncing, you also need to start up a Unison
 process (and keep it running). It is generally recommended to start this up
@@ -379,7 +379,7 @@ Each time you log in, make sure you restart Unison, but be careful to not have
 multiple copies running in parallel. It is not recommended to do significant
 work on the project without Unison running to avoid merge conflicts (rare).
 
-### 8. Cron
+### 8. Cron (Optional)
 
 Cron is disabled by default. Running cron may result in faster draining of
 laptop batteries. To manually trigger background index updates, run `magento
@@ -389,8 +389,6 @@ second cron to run).
     cd /var/www/magento2
     magento cron:run
     magento cron:run
-
-TODO: VERIFY TWO RUNS ARE NEEDED FIRST TIME ONLY. IF SO, CAN SIMPLIFY HERE.
 
 To enable cron permanently run the following shell script.
 
@@ -421,7 +419,7 @@ Be aware that in developer mode the slower PHP debug mode is on and missing
 CSS and similar files are created on demand. This means the first time you
 load a page you will see significantly longer load times.
 
-### 10. Configure PHP Storm (if appropriate)
+### 10. Configure PHP Storm (Optional)
 
 TODO: WARNING: THIS SECTION IS NOT COMPLETE.
 
@@ -470,7 +468,7 @@ completed.
  8. Select "Tools" / "SSH Terminal", and select the "Default Remote
     Interpreter" radio button.
 
-### 11. Varnish Configuration
+### 11. Varnish Configuration (Optional)
 
 TODO: WARNING: THIS SECTION IS NOT COMPLETE.
 
@@ -490,7 +488,7 @@ number, use
 
     docker-compose port varnish 6081
 
-### 12. Redis Configuration
+### 12. Redis Configuration (Optional)
 
 Uncomment the Redis service in the `docker-compose.yml` if you wish to use
 Redis during development, keeping your local development environment closer to
@@ -516,7 +514,9 @@ To turn on usage of Redis for page caching (not needed if using Varnish), run
 
     magento setup:config:set --page-cache=redis --page-cache-redis-server=redis --page-cache-redis-db=2
 
-### 13. Grunt and Gulp Configuration
+### 13. ElasticSearch Configuration (Optional)
+### 14. ElasticSearch Configuration (Optional)
+### 15. Grunt and Gulp Configuration (Optional)
 
 Grunt and Gulp are both frontend tool chains to speed up frontend development.
 They can both auto-recompile CSS files as soon as a file is written to disk.
