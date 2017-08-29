@@ -200,7 +200,8 @@ down Composer.)
 **Getting Code from a GitHub Project**
 
 It is strongly recommended to saving your project code in a private git
-repository on a hosting provider such as GitHub or BitBucket.
+repository on a hosting provider such as GitHub or BitBucket. The following
+describes how a new environment can get the code from such an environment.
 
 Log into the web container:
 
@@ -245,6 +246,7 @@ The following is a sample session
     xdebug-off
     composer install
     php vendor/magento/magento-cloud-configuration/patch.php
+    chmod +x bin/magento
 
 Note that `magento-cloud get` is an alternative to the `git clone` command
 above. `magento-cloud build` runs the `composer install` and patching command,
