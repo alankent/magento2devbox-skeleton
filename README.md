@@ -217,7 +217,39 @@ Check out the project from inside the container into the `magento2` directory.
 
 **Magento Commerce (Cloud)**
 
-TODO
+TODO: WARNING: THIS SECTION IS NOT COMPLETE.
+
+The following discussion is not a replacement for reading through the Magento
+Commerce Cloud documentation on http://devdocs.magento.com/, but it summarizes
+the main steps most users would take.
+
+ 1. Create your project using the Magento Cloud console.
+ 2. Make sure you have SSH keys set up to access the account. (See
+    `magento-cloud ssh-keys` and `magento-cloud ssh-key:add`.) The
+    `magento-cloud` CLI is preinstalled in the web service container.
+ 3. In the console, click on "GIT" next to the "CLI" button to show the git
+    command to check out the project's source code.
+ 4. Remove the default `magento2` directory.
+ 5. Check out the cloud git repo under the `magento2` directory. MAKE SURE YOU
+    CHANGE THE LAST GIT ARGUMENT TO `magento2`.
+ 6. Run `composer install` to download all other dependencies.
+ 7. If you have any cloud patches you wish to use during development, run the
+    `patch.php` file from the cloud configuration package.
+
+The following is a sample session
+
+    cd /var/www
+    rm -rf magento2
+    git clone --branch master 12myproj34@git.us.magento.cloud:12myproj34.git magento2
+    cd magento2
+    xdebug-off
+    composer install
+    php vendor/magento/magento-cloud-configuration/patch.php
+
+Note that `magento-cloud get` is an alternative to the `git clone` command
+above. `magento-cloud build` runs the `composer install` and patching command,
+but also runs additional commands (such as `di-compile`) which you may not want
+to run during development.
 
 **Internal Development**
 
@@ -236,19 +268,19 @@ Make a local clone of Magento Open Source (formerly Community Edition). Use
 your own fork repository URL if appropriate.
 
     cd /var/www
-    git clone https://github.com/magento/magento2.git
-    cd magento2
-    xdebug-off
-    composer install
+    rm -rf magento2
+    git clone https://github.com/magento/magento2skeleton.git magento2
 
-Clone any other projects such as Magento Commerce (formerly Enterprise Edition)
-or the B2B code base, if you have appropriate permissions.
-
-    cd /var/www
+    git clone https://github.com/magento/magento2ce.git
     git clone https://github.com/magento/magento2ee.git
+    git clone https://github.com/magento/magento2b2b.git
+
     cd magento2
-    xdebug-off
-    composer require ...TODO...
+    composer config repositories.ce path "../magento2ce/app/*/*/*"
+    composer config repositories.ee path "../magento2ee/app/*/*/*"
+    composer config repositories.b2b path "../magento2b2b/app/*/*/*"
+
+    composer install
 
 ### 5. Create the Database
 
@@ -438,7 +470,7 @@ completed.
 
 ### 11. Varnish Configuration
 
-TODO: THIS SECTION IS NOT COMPLETE.
+TODO: WARNING: THIS SECTION IS NOT COMPLETE.
 
 Varnish is a "HTTP accelerator" that sits in front the web server and caches
 content of HTTP responses. It is recommended to use Varnish during development
@@ -447,16 +479,12 @@ to help identify caching issues as early as possible.
 To enable Varnish, run the following command. This updates configuration
 settings in the database.
 
-TODO: NEED TO TRY THIS OUT AND TEST WITH VARNISH CONTAINER ETC.
-
     varnish-install
     # magento config:set --scope=default --scope-code=0 system/full_page_cache/caching_application 2
 
 To connect via your web browser to Varnish, you must use the Varnish port
 number instead of the web server port number. To determine the Varnish port
 number, use
-
-TODO: WHY 6081? WHY NOT PORT 80? DEVDOCS MENTIONED PORT 6082 AS WELL.
 
     docker-compose port varnish 6081
 
@@ -641,6 +669,9 @@ will also be restored.
 
     # Make changes to docker-compose.yml
     docker-compose up -d --build
+
+Note: If using Unison for file syncing, you may need to rerun
+`composer install` on your installation to recreate some symbolic links.
 
 ## Kitematic
 
