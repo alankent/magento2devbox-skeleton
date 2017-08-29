@@ -330,22 +330,37 @@ be added when the project was created above.
 
 **Loading Sample Data (Optional)**
 
-To download the Luma sample data, you may need to provide Composer
+To *download* the Luma sample data, you may need to provide Composer
 authentication details. If you already have a `~/.composer/auth.json` file you
 can run
 
     COMPOSER_AUTH=$(cat ~/.composer/auth.json) magento sampledata:deploy
 
-Otherwise run the following command and enter your public and private keys when
+OTHERWISE run the following command and enter your public and private keys when
 prompted.
 
     magento sampledata:deploy
 
-To load the sample data into the database, run
+To *load* the downloaded sample data into the database, run
 
     magento setup:upgrade
 
-### 6. Put Site into Developer Mode
+### 6. Cron (Optional)
+
+Cron is disabled by default. Running cron may result in faster draining of
+laptop batteries. To manually trigger background index updates, run `magento
+cron:run` twice in a row (sometimes the first cron schedules jobs for the
+second cron to run).
+
+    cd /var/www/magento2
+    magento cron:run
+    magento cron:run
+
+To enable cron permanently run the following shell script.
+
+    cron-install
+
+### 7. Put Site into Developer Mode
 
 Put the site into developer mode. Turning on xdebug is useful for debuging
 purposes, but makes all PHP scripts slower to execute.
@@ -353,7 +368,32 @@ purposes, but makes all PHP scripts slower to execute.
     magento deploy:mode:set developer
     xdebug-on
 
-### 7. Start Unison (Mac, Windows)
+### 8. Connect with a Web Browser
+
+Run the following command to determine the web server port number to use when
+connecting to the web service container. (This can be different to the port
+number used inside the container.)
+
+    docker-compose port web 80
+
+If the response is, for example, port 8080, connect to the web server store
+front using
+
+    http://localhost:8080/
+
+Connect to the Magento Admin by appending `/admin` with username "admin" and
+password "admin123" (from the earlier `magento setup:install` command)
+
+    http://localhost:8080/admin
+
+If you are running Docker inside VirtualBox, replace "localhost" with the IP
+address VirtalBox allocated to the VM Docker is running within.
+
+Be aware that in developer mode the slower PHP debug mode is on and missing
+CSS and similar files are created on demand. This means the first time you
+load a page you will see significantly longer load times.
+
+### 9. Start Unison (Mac, Windows)
 
 If you are using Unison for file syncing, you also need to start up a Unison
 process (and keep it running). It is generally recommended to start this up
@@ -378,46 +418,6 @@ Linux (not Unison).
 Each time you log in, make sure you restart Unison, but be careful to not have
 multiple copies running in parallel. It is not recommended to do significant
 work on the project without Unison running to avoid merge conflicts (rare).
-
-### 8. Cron (Optional)
-
-Cron is disabled by default. Running cron may result in faster draining of
-laptop batteries. To manually trigger background index updates, run `magento
-cron:run` twice in a row (sometimes the first cron schedules jobs for the
-second cron to run).
-
-    cd /var/www/magento2
-    magento cron:run
-    magento cron:run
-
-To enable cron permanently run the following shell script.
-
-    cron-install
-
-### 9. Connect with a Web Browser
-
-Run the following command to determine the web server port number to use when
-connecting to the web service container. (This can be different to the port
-number used inside the container.)
-
-    docker-compose port web 80
-
-If the response is, for example, port 8080, connect to the web server store
-front using
-
-    http://localhost:8080/
-
-Connect to the Magento Admin by appending `/admin` with username "admin" and
-password "admin123" (from the earlier `magento setup:install` command)
-
-    http://localhost:8080/admin
-
-If you are running Docker inside VirtualBox, replace "localhost" with the IP
-address VirtalBox allocated to the VM Docker is running within.
-
-Be aware that in developer mode the slower PHP debug mode is on and missing
-CSS and similar files are created on demand. This means the first time you
-load a page you will see significantly longer load times.
 
 ### 10. Configure PHP Storm (Optional)
 
@@ -515,7 +515,13 @@ To turn on usage of Redis for page caching (not needed if using Varnish), run
     magento setup:config:set --page-cache=redis --page-cache-redis-server=redis --page-cache-redis-db=2
 
 ### 13. ElasticSearch Configuration (Optional)
-### 14. ElasticSearch Configuration (Optional)
+
+TODO
+
+### 14. RabbitMQ Configuration (Optional)
+
+TODO
+
 ### 15. Grunt and Gulp Configuration (Optional)
 
 Grunt and Gulp are both frontend tool chains to speed up frontend development.
