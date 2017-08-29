@@ -388,6 +388,8 @@ load a page you will see significantly longer load times.
 
 ### 10. Configure PHP Storm (if appropriate)
 
+TODO: WARNING: THIS SECTION IS NOT COMPLETE.
+
 PHP Storm is a popular IDE for PHP development. This section describes common
 PHP Storm configuration settings for Magento 2 projects. PHP Storm has changed
 (and will continue to change) over time, so the following instructions are
