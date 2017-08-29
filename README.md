@@ -151,7 +151,7 @@ service container.
 The `m2ssh` BAT and bash scripts automatically pick up the port number from the
 `docker-compose.yml` file and logs on to the 'magento2' account.
 
-    m2ssh
+    ./m2ssh
 
 If you are running Docker in VirtualBox, you may need to edit the local `m2ssh`
 and `m2unison` scripts to replace "localhost" with the IP address allocated by
@@ -184,7 +184,7 @@ started.
 
 Log into the web container.
 
-    m2ssh
+    ./m2ssh
 
 Create a new project under `/var/www/magento2`. Update the project edition and
 version number as appropriate. This example uses Magento Open Source (formerly
@@ -204,7 +204,7 @@ repository on a hosting provider such as GitHub or BitBucket.
 
 Log into the web container:
 
-    m2ssh
+    ./m2ssh
 
 Check out the project from inside the container into the `magento2` directory.
 
@@ -230,7 +230,7 @@ developers.)
 
 Log into the web container:
 
-    m2ssh
+    ./m2ssh
 
 Make a local clone of Magento Open Source (formerly Community Edition). Use
 your own fork repository URL if appropriate.
@@ -257,7 +257,7 @@ to use. The following creates the database `magento2`.
 
 Log on to the bash prompt inside the web container
 
-    m2ssh
+    ./m2ssh
 
 Run the following commands to create a MyQL database for the web site to use
 (plus a second database for integration tests to use).
@@ -336,7 +336,7 @@ Mac binaries and a shell script are also provided. It is recommended to run the
 sync shell script in a separate Terminal window so you can refer to its output
 if you ever need to do troubleshooting.
 
-    ./m2unison
+    ./m2unison.sh
 
 This shell script cannot be used on Linux, only Mac OSX. Use volume mounting on
 Linux (not Unison).
@@ -388,7 +388,50 @@ load a page you will see significantly longer load times.
 
 ### 10. Configure PHP Storm (if appropriate)
 
-TODO: Script? SSH and Remote Interpreters?
+PHP Storm is a popular IDE for PHP development. This section describes common
+PHP Storm configuration settings for Magento 2 projects. PHP Storm has changed
+(and will continue to change) over time, so the following instructions are
+indicative only.
+
+The following instructions assume the previous steps have already been
+completed.
+
+**Create New Project**
+
+ 1. Create a new project in PHP Storm using "Create New Project from Existing
+    Files".
+ 2. Use the option "Source files are in local directory, no Web server is yet
+    configured." (We will add the web server by hand later.)
+ 3. Select `shared/www` as the project root directory.
+ 4. Go to "File" / "Settings" to bring up the project's "Settings" diaglog box.
+ 5. Select "Directories" in the Settings Diaglog side bar.
+    Suggested settings are:
+     * Mark the root directory as "Sources".
+     * Mark `magento2/dev/tests` as "Tests".
+     * Mark `magento2/dev/tests/integration/tmp` as "Excluded".
+     * Mark `magento2/pub/static` as "Excluded". (This directory may not exist
+       until you access the site, triggering its creation.)
+     * Mark `magento2/var` as "Excluded".
+     * Mark `magento2/vendor/magento/magento2-base` as "Excluded".
+ 6. Select "Editor" / "File Encodings" in the Settings Diaglog side bar.
+     * Set "Project Encoding" to "UTF-8".
+ 7. Select "Languages & Frameworks" / "PHP" in the Settings Diaglog side bar.
+     * Select "7" from the drop down list of PHP versions.
+     * Click "..." next to "CLI Interpreter" to bring up a list of "CLI
+       Interpreters".
+     * Click "+" then "From Docker, Vagrant, VM, Remote".
+     * Select "SSH Credentials". (You may try "Docker Composer" if you prefer,
+       but it is more complicated to set up.) Use:
+	- Enter `localhost` for the host name (or the IP address allocated by
+	  VirtualBox if running Docker inside VirtualBox).
+	- Enter the port number from `docker-compose port web 22` (e.g. 2222)
+	  for the port number.
+	- Enter `magento2` for the user name.
+	- Select "Password" as the "Auth type".
+	- Leave the password field blank.
+	- Set the PHP executable path to `/usr/local/bin/php`.
+ 8. Select "Tools" / "SSH Terminal", and select the "Default Remote
+    Interpreter" radio button.
 
 ### 11. Varnish Configuration
 
