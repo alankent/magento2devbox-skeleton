@@ -16,12 +16,7 @@ REM Add Windows\system32 to start of path to find the right "timeout" command
 REM Cygwin can end up with 'unix like' timeout in path instead otherwise
 PATH C:\Windows\System32;%PATH%
 
-REM Fetch the external Docker Unison port number
-FOR /f "delims=" %%A IN ('docker-compose port web 5000') DO SET "CMD_OUTPUT=%%A"
-FOR /f "tokens=1,* delims=:" %%A IN ("%CMD_OUTPUT%") DO SET "UNISON_PORT=%%B"
-
 @SET LOCAL_ROOT=./shared/www
-@SET REMOTE_ROOT=socket://localhost:%UNISON_PORT%//var/www
 
 @SET IGNORE=
 
@@ -34,8 +29,6 @@ REM Magento files not worth pulling locally.
 @SET IGNORE=%IGNORE% -ignore "Path magento2/var/tmp"
 @SET IGNORE=%IGNORE% -ignore "Path magento2/var/.setup_cronjob_status"
 @SET IGNORE=%IGNORE% -ignore "Path magento2/var/.update_cronjob_status"
-@SET IGNORE=%IGNORE% -ignore "Path magento2/pub/media"
-@SET IGNORE=%IGNORE% -ignore "Path magento2/pub/static"
 
 REM Other files not worth pushing to the container.
 @SET IGNORE=%IGNORE% -ignore "Path magento2/.git"
@@ -45,6 +38,11 @@ REM Other files not worth pushing to the container.
 @SET IGNORE=%IGNORE% -ignore "Name {.idea}"
 @SET IGNORE=%IGNORE% -ignore "Name {.*.swp}"
 @SET IGNORE=%IGNORE% -ignore "Name {.unison.*}"
+
+REM Fetch the external Docker Unison port number
+FOR /f "delims=" %%A IN ('docker-compose port web 5000') DO SET "CMD_OUTPUT=%%A"
+FOR /f "tokens=1,* delims=:" %%A IN ("%CMD_OUTPUT%") DO SET "UNISON_PORT=%%B"
+@SET REMOTE_ROOT=socket://localhost:%UNISON_PORT%//var/www
 
 @set UNISONARGS=%LOCAL_ROOT% %REMOTE_ROOT% -prefer %LOCAL_ROOT% -preferpartial "Path var -> %REMOTE_ROOT%" -auto -batch %IGNORE%
 
@@ -57,6 +55,14 @@ REM **** Entering file watch mode ****
 :loop_sync
     .\unison %UNISONARGS% -repeat watch
     TIMEOUT 5
+
+    REM Re-fetch the external Docker Unison port number in case it changed.
+    FOR /f "delims=" %%A IN ('docker-compose port web 5000') DO SET "CMD_OUTPUT=%%A"
+    FOR /f "tokens=1,* delims=:" %%A IN ("%CMD_OUTPUT%") DO SET "UNISON_PORT=%%B"
+    @SET REMOTE_ROOT=socket://localhost:%UNISON_PORT%//var/www
+
+    @set UNISONARGS=%LOCAL_ROOT% %REMOTE_ROOT% -prefer %LOCAL_ROOT% -preferpartial "Path var -> %REMOTE_ROOT%" -auto -batch %IGNORE%
+
     @GOTO loop_sync
 
 :exit

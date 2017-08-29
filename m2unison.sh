@@ -12,11 +12,7 @@ if [[ ! -f unison ]]; then
     chmod +x unison unison-fsmonitor
 fi
 
-# Fetch the external Docker Unison port number
-UNISON_PORT=$(docker-compose port web 5000 | awk -F: '{print $2}')
-
 LOCAL_ROOT=./shared/www
-REMOTE_ROOT=socket://localhost:$UNISON_PORT//var/www
 
 IGNORE=
 
@@ -29,8 +25,6 @@ IGNORE="$IGNORE -ignore 'Path magento2/var/session'"
 IGNORE="$IGNORE -ignore 'Path magento2/var/tmp'"
 IGNORE="$IGNORE -ignore 'Path magento2/var/.setup_cronjob_status'"
 IGNORE="$IGNORE -ignore 'Path magento2/var/.update_cronjob_status'"
-IGNORE="$IGNORE -ignore 'Path magento2/pub/media'"
-IGNORE="$IGNORE -ignore 'Path magento2/pub/static'"
 
 # Other files not worth pushing to the container.
 IGNORE="$IGNORE -ignore 'Path magento2/.git'"
@@ -41,6 +35,10 @@ IGNORE="$IGNORE -ignore 'Name {.idea}'"
 IGNORE="$IGNORE -ignore 'Name {.*.swp}'"
 IGNORE="$IGNORE -ignore 'Name {.unison.*}'"
 
+# Fetch the external Docker Unison port number
+UNISON_PORT=$(docker-compose port web 5000 | awk -F: '{print $2}')
+
+REMOTE_ROOT=socket://localhost:$UNISON_PORT//var/www
 UNISONARGS="$LOCAL_ROOT $REMOTE_ROOT -prefer $LOCAL_ROOT -preferpartial 'Path var -> $REMOTE_ROOT' -auto -batch $IGNORE"
 
 if [[ ! -f $LOCAL_ROOT/magento2/vendor ]]; then
@@ -51,5 +49,13 @@ fi
 while true; do
     echo "**** Entering file watch mode ****"
     ./unison $UNISONARGS -repeat watch
+
     sleep 5
+
+    # Re-fetch the external Docker Unison port number in changes
+    UNISON_PORT=$(docker-compose port web 5000 | awk -F: '{print $2}')
+
+    REMOTE_ROOT=socket://localhost:$UNISON_PORT//var/www
+    UNISONARGS="$LOCAL_ROOT $REMOTE_ROOT -prefer $LOCAL_ROOT -preferpartial 'Path var -> $REMOTE_ROOT' -auto -batch $IGNORE"
+
 done

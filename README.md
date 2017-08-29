@@ -352,6 +352,7 @@ laptop batteries. To manually trigger background index updates, run `magento
 cron:run` twice in a row (sometimes the first cron schedules jobs for the
 second cron to run).
 
+    cd /var/www/magento2
     magento cron:run
     magento cron:run
 
@@ -473,6 +474,8 @@ Magento 2.2 onwards.
 
 To turn on usage of Redis for session caching, run
 
+    cd /var/www/magento2
+    rm var/session/*
     magento setup:config:set --session-save=redis --session-save-redis-host=redis --session-save-redis-log-level=3 --session-save-redis-timeout=10
 
 To turn on usage of Redis for default data caching, run
@@ -554,15 +557,23 @@ directory).
 Next, add a repository reference to all the directories containing packages
 (that is, all directories containing a `composer.json` file). You may use `*`
 in path wildcards to include multiple directories at a time. Make sure you use
-quotes to make sure the shell does not expand the wildcards.
+quotes to make sure the shell does not expand the wildcards. (The wildcard will
+match directories such as modules in `app/code/Magento/*` and themes in
+`app/design/MyVendor/*`.)
 
-    composer config repositories.myrepo path "../myrepo/app/*/myvendor/*"
+    composer config repositories.myrepo path "../myrepo/app/*/*/*"
+
+If developing a module, set the minimum stability to `dev` (and set it back to
+a stable level when going live). See the Composer documentation for more
+options.
+
+    composer config minimum-stability dev
 
 You can then add dependencies to any of the packages in the specified
 directories. Composer will create a symlink from under the `vendor/myvendor`
 directory to the appropriate git repository directory.
 
-    composer require myvendor/module-mymodule:*
+    composer require "myvendor/module-mymodule:*"
 
 Note that while Unison will not sync the symlink, if you specify the
 `shared/www` local directory as the "source code root" in PHP Storm, it will
