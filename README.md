@@ -58,13 +58,13 @@ file system is changed, it is copied into the web container, and vice versa.
 This allows IDEs to be natively used on a laptop (or desktop) - Unison copies
 file changes as soon as they are written to disk into the web conatiner.
 
-DevBox uses the "Docker Sync" project (http://docker-sync.io/) for file
-sharing, but only uses the Unison mode of file sharing.
+DevBox uses a similar approach to the "Docker Sync" project
+(http://docker-sync.io/) for file sharing, but only supports Unison.
 
 (Insiders secret: Unison is written in a language called OCaml. OCaml 4.01 and
 4.02 changed a serialization algorithm in a backwards incompatible way. So you
 need to make sure you have Unison binaries on Windows, Mac, and Linux compiled
-with the same version of OCaml. Brew + Docker-Sync + the supplied Windows
+with the same version of OCaml. Brew + Debian:Stretch + the supplied Windows
 binary currently all match. If you try experimenting with other binaries,
 beware the pit of despair when things start going strange for no apparent
 reason!)
