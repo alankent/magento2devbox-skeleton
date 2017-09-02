@@ -15,4 +15,7 @@ SSH_HOST=$(docker-compose port web 22 | awk -F: '{
 
 SSH_PORT=$(docker-compose port web 22 | awk -F: '{print $2}')
 
+exec ssh -p ${SSH_PORT} magento2@${SSH_HOST} $*
+
+# The following version quietens more messages due to recreating containers
 exec ssh -o LogLevel=error -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p ${SSH_PORT} magento2@${SSH_HOST} $*

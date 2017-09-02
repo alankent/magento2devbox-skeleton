@@ -9,12 +9,13 @@ services:
         restart: always
         image: alankent/magento2devbox-web:latest
 
-        # Uncomment this line if you uncomment any of the following volumes.
-        #volumes:
+        volumes:
 
-          # LEAVE THIS LINE COMMENTED OUT IF YOU ARE USING UNISON.
-          # Uncomment to use Docker volume mounts to share files with
-          # local file system.
+          # Uncomment the first line for use with Unison and the "unison" service
+          # below (Mac, Windows). Uncomment the second line instead to mount
+          # the volume directly (Linux). Comment out both lines if file sharing
+          # is not required.
+          - "src:/var/www"
           #- "./shared/www:/var/www"
 
           # Uncomment to share your ~/.ssh directory with the container.
@@ -67,14 +68,29 @@ services:
           # Storm reconfiguration.)
           - "2222:22"
 
-          # Pick a random unused unison port.
-          # (Only needed if using Unison for file syncing.)
-          - "5000"
-
           # Expose the BrowserSync ports.
           # (Only needed if using BrowserSync for frontend development.)
           - "3000"
           - "3001"
+
+    # This container contains the Unison process.
+    # Remove this service if not using Unison.
+    unison:
+        restart: always
+        image: alankent/magento2devbox-unison:latest
+
+        # Mount the /var/www directory from the "web" container.
+        volumes_from:
+          - "web"
+
+        ports:
+          # Pick a random unused unison "socket" port.
+          # This can be commented out if "ssh" access is used instead.
+          - "5000"
+
+          # Pick a random port for ssh based Unison connections (developers
+          # normally do not log in to this container).
+          - "22"
 
     db:
         restart: always
