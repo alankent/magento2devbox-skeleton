@@ -107,7 +107,7 @@ this GitHub repository to the project directory.
 Review the `docker-compose.yml` file in a text editor, making necessary
 adjustments as described by comments in the file. This includes:
 
-* For Mac and Windows, make sure the `src:/var/www` volume is uncommented and
+* For Mac and Windows, make sure the `/var/www` volume is uncommented and
   the `./shared/www:/var/www` line is commented out. Make sure the "unison"
   service is also uncommented. This is required for Unison to access the
   Magento source code.
