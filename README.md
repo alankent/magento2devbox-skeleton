@@ -102,6 +102,9 @@ this GitHub repository to the project directory.
   * Click on the green button "Clone or Download" and select "Download ZIP".
   * Extract the ZIP file contents into the project directory.
 
+It is common to modify these downloaded files and delete unwanted files. For
+example, on Mac it is common to delete Windows BAT files.
+
 ### 2. Review and Update the docker-compose.yml File
 
 Review the `docker-compose.yml` file in a text editor, making necessary
@@ -165,17 +168,16 @@ need to use `winpty`. In that case you must use the following command.
 
 In general this works well, but on Windows the 'exec' command will exit if you
 press CTRL+Z. If you like using CTRL+Z in Linux, this is rather annoying, so
-SSH access is recommended instead. SSH is currently only supported in the 'web'
-service container.
+SSH access is recommended instead.
 
 The `m2ssh` BAT and bash scripts automatically pick up the port number from the
-`docker-compose.yml` file and logs on to the 'magento2' account.
+`docker-compose.yml` file and logs on to the 'magento2' account of the 'web'
+container.
 
     ./m2ssh
 
-If you are running Docker in VirtualBox, you may need to edit the local `m2ssh`
-and `m2unison` scripts to replace "localhost" with the IP address allocated by
-VirtualBox.
+If you are running Docker in VirtualBox, you may need to edit the provided 
+scripts to replace "localhost" with the IP address allocated by VirtualBox.
 
 Note: If you destroy and recreate containers, SSH may report warnings about
 changes in identity and refuse to connect. Use a text editor to remove
@@ -200,10 +202,13 @@ to help restrict access to the download keys.
 **Option 1: Existing Project**
 
 If you have an existing project with all the source code already under
-`shared/www` on your laptop, no additional configuration is needed. If you use
-volume mounting, the code will automatically be visible; if you use Unison,
-Unison will copy files on your laptop into the web container when it is
+`shared/www/magento2` on your laptop, no additional configuration is needed. If
+you use volume mounting, the code will automatically be visible; if you use
+Unison, Unison will copy files on your laptop into the web container when it is
 started.
+
+If using Unison, please note that symbolic links are not copied. You may need
+to run `composer install` to recreate any symbolic links required by Composer.
 
 **Option 2: Creating a New Project with Composer**
 
@@ -224,7 +229,7 @@ down Composer.)
 
 **Option 3: Getting Code from a GitHub Project**
 
-It is strongly recommended to saving your project code in a private git
+It is strongly recommended to save your project code in a private git
 repository on a hosting provider such as GitHub or BitBucket. The following
 describes how a new environment can get the code from such an environment.
 
@@ -253,8 +258,8 @@ the main steps most users would take.
  2. Make sure you have SSH keys set up to access the account. (See
     `magento-cloud ssh-keys` and `magento-cloud ssh-key:add`.) The
     `magento-cloud` CLI is preinstalled in the web service container.
- 3. In the console, click on "GIT" next to the "CLI" button to show the git
-    command to check out the project's source code.
+ 3. In the Magento Cloud console, click on "GIT" next to the "CLI" button to
+    show the git command to check out the project's source code.
  4. Remove the default `magento2` directory.
  5. Check out the cloud git repo under the `magento2` directory. MAKE SURE YOU
     CHANGE THE LAST GIT ARGUMENT TO `magento2`.
@@ -274,16 +279,15 @@ The following is a sample session
     chmod +x bin/magento
 
 Note that `magento-cloud get` is an alternative to the `git clone` command
-above. `magento-cloud build` runs the `composer install` and patching command,
-but also runs additional commands (such as `di-compile`) which you may not want
-to run during development.
+above, but it is recommended to use `git` directly to check the code out into
+the correct directory name (`/var/www/magento2`) as required by DevBox.
 
 **Option 5: Internal Development**
 
 TODO: THIS SECTION IS INDICATIVE OF FUTURE DIRECTION, NOT SUPPORTED YET.
 
-This section is ONLY relevant to internal Magento developers, or external
-developers wishing to submit a pull request. The following is NOT recommended
+This section is only relevant to internal Magento developers, or external
+developers wishing to submit a pull request. The following is not recommended
 for production sites. (It may however be worth exploring by extension
 developers.)
 
@@ -459,9 +463,9 @@ to its output if you ever need to do troubleshooting.
 
 If you ever restart the Docker containers, you may need to rerun
 `m2unison-profile` as the profile file containers the SSH port number used
-by the Unison container from the `docker-compose.yml` file. (Using the
-`2223:22` syntax for the SSH port number in `docker-composer.yml` can avoid
-this problem.)
+by the Unison container from the `docker-compose.yml` file. (Alternatively,
+using the `2223:22` syntax to lock down the SSH port number in
+`docker-composer.yml` avoids this problem.)
 
 **Windows**
 
@@ -474,7 +478,8 @@ line arguments. Close the window to kill Unison.
     START m2unison.bat
 
 There is a setting at the top of the script to choose between SSH access and
-direct sockets. Using a plain socket has been reported to hang occasionally.
+direct sockets. Using plain sockets has been reported to hang occasionally so
+SSH has been enabled by default.
 
 ### 10. Configure PHP Storm (Optional)
 
