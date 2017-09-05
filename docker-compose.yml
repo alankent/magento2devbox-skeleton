@@ -9,13 +9,19 @@ services:
         restart: always
         image: alankent/magento2devbox-web:latest
 
+        depends_on:
+          - db
+          #- rabbitmq
+          #- elastic
+          #- rabbitmq
+
         volumes:
 
-          # Uncomment the first line for use with Unison and the "unison" service
-          # below (Mac, Windows). Uncomment the second line instead to mount
-          # the volume directly (Linux). Comment out both lines if file sharing
-          # is not required.
-          - "src:/var/www"
+          # Uncomment the first line for use with Unison and the "unison"
+          # service below (Mac, Windows). Uncomment the second line instead
+          # to mount the volume directly (Linux). Comment out both lines if
+          # file sharing is not required.
+          - "/var/www"
           #- "./shared/www:/var/www"
 
           # Uncomment to share your ~/.ssh directory with the container.
@@ -74,10 +80,13 @@ services:
           - "3001"
 
     # This container contains the Unison process.
-    # Remove this service if not using Unison.
+    # Comment out / remove this service if not using Unison (e.g. on Linux).
     unison:
         restart: always
         image: alankent/magento2devbox-unison:latest
+
+        depends_on:
+          - "web"
 
         # Mount the /var/www directory from the "web" container.
         volumes_from:
@@ -90,6 +99,7 @@ services:
 
           # Pick a random port for ssh based Unison connections (developers
           # normally do not log in to this container).
+          # Use "2223:22" to lock the port number across container restarts.
           - "22"
 
     db:

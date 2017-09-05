@@ -433,8 +433,6 @@ significant work on the project without Unison running to avoid merge conflicts
 
 **Mac**
 
-TODO: VERIFY WHEN TESTING FINISHED.
-
 On Mac, first install Unison using "brew". This installs the correct command
 line version of Unison. Also install "unox" for a companion file watching
 utility.
@@ -446,7 +444,7 @@ utility.
 For Mac, create a "profile" file in `~/.unison/m2devbox-{myproj}.prf` ({myproj}
 is the current directory name) by running the following command.
 
-    ./m2unison-profile   TODO: THIS SHOULD RUN SSH TO ACCEPT SSH FINGERPRINT
+    ./m2unison-profile
 
 To perform a "once off" file synchronization, run
 
@@ -458,6 +456,12 @@ To continuously synchronize files (recommended), run
 
 It is recommended to run Unison in a separate Terminal window so you can refer
 to its output if you ever need to do troubleshooting.
+
+If you ever restart the Docker containers, you may need to rerun
+`m2unison-profile` as the profile file containers the SSH port number used
+by the Unison container from the `docker-compose.yml` file. (Using the
+`2223:22` syntax for the SSH port number in `docker-composer.yml` can avoid
+this problem.)
 
 **Windows**
 

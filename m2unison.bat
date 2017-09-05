@@ -99,7 +99,7 @@ REM **** Entering file watch mode ****
         SET REMOTE_ROOT=socket://localhost:%UNISON_PORT%//var/www
     :done2
 
-    set UNISONARGS=%LOCAL_ROOT% %REMOTE_ROOT% -sshargs "%SSH_ARGS" -prefer %LOCAL_ROOT% -preferpartial "Path var -> %REMOTE_ROOT%" -auto -batch %IGNORE%
+    set UNISONARGS=%LOCAL_ROOT% %REMOTE_ROOT% -sshargs "%SSH_ARGS%" -prefer %LOCAL_ROOT% -preferpartial "Path var -> %REMOTE_ROOT%" -auto -batch %IGNORE%
 
     @ECHO ON
     REM **** Unison exited - Restarting file watch mode ****
