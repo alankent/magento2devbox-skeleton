@@ -113,7 +113,7 @@ adjustments as described by comments in the file. This includes:
   Magento source code.
 
 * For Linux, direct file sharing can be used. Make sure the
-  `./shared/www:/var/www` line is uncommented and the `src:/var/www` line is
+  `./shared/www:/var/www` line is uncommented and the `/var/www` line is
   commented out. Also comment out the "unison" service as it is not required.
 
 * Check the port numbers. By default Docker will allocate random free port
