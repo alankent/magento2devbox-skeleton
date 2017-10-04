@@ -67,5 +67,6 @@ batch = true
 EOF
 
 echo "Unison profile '$M2PROFILE' has been created in '~/.unison'."
-echo "Run 'unison -repeat watch $M2PROFILE' for file syncing mode."
 
+echo "Now running 'unison -repeat watch $M2PROFILE' for file syncing mode."
+unison -repeat watch $M2PROFILE

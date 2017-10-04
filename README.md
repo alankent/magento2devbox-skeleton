@@ -169,25 +169,19 @@ utility.
     brew tap eugenmayer/dockersync
     brew install eugenmayer/dockersync/unox
 
-For Mac, create a "profile" file in `~/.unison/m2devbox-{myproj}.prf` ({myproj}
-is the current directory name) by running the following command.
+Use the provided shell script to start up Unison. This shell script creates
+a Unison "profile" file in `~/.unison/m2devbox-{myproj}.prf` ({myproj}
+is the current directory name) then starts up Unison in file watching mode.
 
-    ./m2unison-profile
-
-To continuously synchronize files, run
-
-    unison -repeat watch m2devbox-{myproj}
+    ./m2unison.sh
 
 It is recommended to run Unison in a separate Terminal window so you can refer
 to its output if you ever need to do troubleshooting. This is also useful when
 synchronizing a large number of files for the first time to know when the copy
 has completed.
 
-If you ever restart the Docker containers, you may need to rerun
-`m2unison-profile` as the profile file containers the SSH port number used
-by the Unison container from the `docker-compose.yml` file. (Alternatively,
-use the `2223:22` syntax to lock down the SSH port number in
-`docker-composer.yml` so the port number does not change.)
+If you ever restart the Docker containers, you may need to rerun `m2unison.sh`
+to pick up any port number changes.
 
 **Windows**
 
@@ -198,6 +192,8 @@ from the web container. A profile is not required as the BAT file uses command
 line arguments. Close the window to kill Unison.
 
     START m2unison.bat
+
+Note: The shell script (`m2unison.sh`) is not intended for use on Windows.
 
 ## 5. Install Magento
 
