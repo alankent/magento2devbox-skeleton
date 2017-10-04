@@ -41,7 +41,7 @@ when you are working on multiple projects.
 
 This section walks you through how to install DevBox.
 
-## Prerequisites
+## 0. Prerequisites
 
 * Install a recent version of Docker from http://docker.com/. Docker is
   available for Windows, Mac, and Linux. 
@@ -54,14 +54,12 @@ This section walks you through how to install DevBox.
   Linux commands. The following instructions assume you are using Git Bash.
 * On Mac, install "Brew" (https://brew.sh/) if you have not done so already.
 
-## Setting Up a New Environment
+## 1. Create a Local Project Directory
 
-### 1. Create a Local Project Directory
+Create a new directory per project. Use a short but meaningful directory name
+as it is also used as a prefix for DevBox containers.
 
-Create a new directory per project. Use a meaningful directory name as it is
-also used as a prefix for DevBox containers.
-
-Download a copy of the files in this GitHub repository to the project directory.
+Download an initial set of files to the project directory.
 
   * Go to http://github.com/alankent/magento2devbox-skeleton
   * In the "Branch" drop down, select the tag closest to the project's version
@@ -73,7 +71,7 @@ Download a copy of the files in this GitHub repository to the project directory.
 It is common to modify these downloaded files and delete unwanted files. For
 example, on Mac feel free to delete any Windows BAT files.
 
-### 2. Review and Update the docker-compose.yml File
+## 2. Review and Update the docker-compose.yml File
 
 The following steps set up the Docker configuration files before the containers
 can be started.
@@ -98,7 +96,7 @@ adjustments as described by comments in the file. This includes:
   numbers. Change ports such as "80" to "8080:80" if you want the web server
   port to be always 8080. You cannot run different containers at the same time
   using the same port numbers. On Mac, there is a default web server running on
-  port 80 so you must use a different port number for the web serve container.
+  port 80 so you must use a different port number for the web server container.
 
 * The recommended way to create and update projects is via Composer, a PHP
   package manager. Magento provides a Composer repository from which Magento
@@ -126,7 +124,7 @@ adjustments as described by comments in the file. This includes:
   production, uncomment the appropriate lines so you can test during
   developement.
 
-### 3. Launch the Containers
+## 3. Launch the Containers
 
 Launch the containers by changing to the project directory and then running:
 
@@ -150,7 +148,7 @@ changes in identity and refuse to connect. Use a text editor to remove
 "localhost" lines from your `~/.ssh/known_hosts` file to overcome this issue
 (you will then be prompted to accept new fingerprints on restart).
 
-### 4. Start Unison (Mac, Windows)
+## 4. Start Unison (Mac, Windows)
 
 If you are using Unison for file syncing the host and web container file system
 (recommended on Mac and Windows), you also need to start up a Unison process
@@ -176,16 +174,14 @@ is the current directory name) by running the following command.
 
     ./m2unison-profile
 
-To perform a "once off" file synchronization, run
-
-    unison m2devbox-{myproj}
-
-To continuously synchronize files (recommended), run
+To continuously synchronize files, run
 
     unison -repeat watch m2devbox-{myproj}
 
 It is recommended to run Unison in a separate Terminal window so you can refer
-to its output if you ever need to do troubleshooting.
+to its output if you ever need to do troubleshooting. This is also useful when
+synchronizing a large number of files for the first time to know when the copy
+has completed.
 
 If you ever restart the Docker containers, you may need to rerun
 `m2unison-profile` as the profile file containers the SSH port number used
@@ -203,7 +199,7 @@ line arguments. Close the window to kill Unison.
 
     START m2unison.bat
 
-### 5. Install Magento
+## 5. Install Magento
 
 Next you need to install your Magento project inside the web container under
 the `/var/www/magento2` directory. (Apache is configured by default to use
@@ -352,7 +348,7 @@ If using Unison, symbolic links are not copied. You may need to run
 `composer install` inside the web container to recreate any symbolic links
 required by Composer.
 
-### 6. Create the Database
+## 6. Create the Database
 
 Magento DevBox runs MySQL in a separate database container. The MySQL
 container by default does not have a database created for Magento to use. The
@@ -400,7 +396,7 @@ be added when the project was created above.
 
     --amqp-virtualhost=/ --ampq-host=ampq --amqp-port=TODO --amqp-user=guest --amqp-password=guest
 
-### 7. Loading Sample Data (Optional)
+## 7. Loading Sample Data (Optional)
 
 To download the Luma sample data, you may need to provide Composer
 authentication details. If you already have a `~/.composer/auth.json` file you
@@ -416,7 +412,7 @@ To load the downloaded sample data into the database, run
 
     magento setup:upgrade
 
-### 8. Cron (Optional)
+## 8. Cron (Optional)
 
 Cron is disabled by default as running cron may result in faster draining of
 laptop batteries. To manually trigger background index updates, run `magento
@@ -431,7 +427,7 @@ To enable cron permanently (recommended) run the following command.
 
     cron-install
 
-### 9. Put Site into Developer Mode
+## 9. Put Site into Developer Mode
 
 Magento supports developer and production modes. Production mode makes
 optimizations assuming files on the site will not change. Developer mode is
@@ -439,7 +435,7 @@ suitable when making changes to a site during development.
 
     magento deploy:mode:set developer
 
-### 10. Connect with a Web Browser
+## 10. Connect with a Web Browser
 
 You are now ready to connect to your installation with a web browser.
 
@@ -468,7 +464,7 @@ CSS and similar files are created on demand. This means the first time you
 load a page you will see significantly longer load times. The more pages you
 access, the faster the site will become.
 
-### 11. Configure PHP Storm (Optional)
+## 11. Configure PHP Storm (Optional)
 
 TODO: WARNING: THIS SECTION IS NOT COMPLETE.
 
@@ -517,7 +513,7 @@ completed.
  8. Select "Tools" / "SSH Terminal", and select the "Default Remote
     Interpreter" radio button.
 
-### 12. Varnish Configuration (Optional)
+## 12. Varnish Configuration (Optional)
 
 TODO: WARNING: THIS SECTION IS NOT COMPLETE.
 
@@ -537,7 +533,7 @@ number, use
 
     docker-compose port varnish 6081
 
-### 13. Redis Configuration (Optional)
+## 13. Redis Configuration (Optional)
 
 Uncomment the Redis service in the `docker-compose.yml` if you wish to use
 Redis during development, keeping your local development environment closer to
@@ -563,15 +559,15 @@ To turn on usage of Redis for page caching (not needed if using Varnish), run
 
     magento setup:config:set --page-cache=redis --page-cache-redis-server=redis --page-cache-redis-db=2
 
-### 14. ElasticSearch Configuration (Optional)
+## 14. ElasticSearch Configuration (Optional)
 
 TODO
 
-### 15. RabbitMQ Configuration (Optional)
+## 15. RabbitMQ Configuration (Optional)
 
 TODO
 
-### 16. Grunt and Gulp Configuration (Optional)
+## 16. Grunt and Gulp Configuration (Optional)
 
 Grunt and Gulp are both frontend tool chains to speed up frontend development.
 They can both auto-recompile CSS files as soon as a file is written to disk.
