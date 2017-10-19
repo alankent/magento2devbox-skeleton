@@ -377,14 +377,14 @@ to use RabbitMQ as well.)
 
     magento setup:install --db-host=db --db-name=magento2 --db-user=root --db-password=root --admin-firstname=Magento --admin-lastname=Administrator --admin-email=user@example.com --admin-user=admin --admin-password=admin123 --language=en_US --currency=USD --timezone=America/Chicago --use-rewrites=1 --backend-frontname=admin
 
-It is recommended to NOT include the `--base_url` option during development as
+It is recommended to NOT include the `--base-url` option during development as
 Docker can allocate a port number at random (including when container is
 restarted). It also causes problems using BrowserSync and similar tools for
 frontend development. Some versions of Magento however have a bug requiring
-`--base_url` to be specified. If the URL to CSS files is incorrect, you may
+`--base-url` to be specified. If the URL to CSS files is incorrect, you may
 have a broken version of Magento. If this is the case, force the web server
 port number be a specific port (e.g. use "8080:80" in `docker-composer.yml`)
-and add the `--base_url` command line option (e.g. `--base_url=localhost:8080`).
+and add the `--base-url` command line option (e.g. `--base-url=http://localhost:8080`).
 
 TODO: I THINK YOU CAN RUN A SEPARATE COMMAND LATER. IF CORRECT, MOVE THIS TO A SEPARATE SECTION.
 If you are using RabbitMQ (AMPQ), the following command line arguments should
